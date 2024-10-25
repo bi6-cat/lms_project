@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h2>Danh Sách Khóa Học</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tiêu Đề</th>
+            <th>Giáo Viên</th>
+            <th>Ngày Bắt Đầu</th>
+            <th>Ngày Kết Thúc</th>
+            <th>Hành Động</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if courses %}
+            {% for course in courses %}
+            <tr>
+                <td><a href="{% url 'course_detail' course.id %}">{{ course.title }}</a></td>
+                <td>{{ course.teacher }}</td>
+                <td>{{ course.start_date }}</td>
+                <td>{{ course.end_date }}</td>
+                {% if user.role == 'teacher' %}
+                <td>
+                    <a href="{% url 'edit_course' course.id %}">Chỉnh Sửa</a> |
+                    <a href="{% url 'delete_course' course.id %}">Xóa</a>
+                </td>
+                {% else %}
+                <td>
+                    {% if course in enrolled_courses %}
+                        <a href="{% url 'course_detail' course.id %}" class="btn btn-secondary">Đã đăng ký</a>
+                    {% else %}
+                        <a href="{% url 'course_detail' course.id %}" class="btn btn-primary">Xem chi tiết</a>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="5">Không có khóa học nào.</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+{% if user.role == 'teacher' %}
+    <a href="{% url 'add_course' %}">Tạo Khóa Học Mới</a>
+{% endif %}
+
+{% endblock %}

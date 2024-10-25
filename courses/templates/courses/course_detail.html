@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h2>{{ course.title }}</h2>
+<p><strong>Giáo Viên:</strong> {{ course.teacher }}</p>
+<p><strong>Mô Tả:</strong> {{ course.description }}</p>
+<p><strong>Ngày Bắt Đầu:</strong> {{ course.start_date }}</p>
+<p><strong>Ngày Kết Thúc:</strong> {{ course.end_date }}</p>
+
+{% if user.is_authenticated %}
+    {% if user.role == 'student' %}
+        {% if is_enrolled %}
+            <p> {{ enrollment }}</p>
+            {% comment %} Hiển thị nút hủy đăng ký {% endcomment %}
+            <form method="post">
+                {% csrf_token %}
+                <a href="{% url 'unenroll_course' course.id %}">Hủy Đăng Ký</a>
+        {% else %}
+            <a href="{% url 'enroll_course' course.id %}">Đăng Ký Khóa Học</a>
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+<a href="{% url 'course_list' %}"> Quay lại danh sách</a>
+{% endblock %}
