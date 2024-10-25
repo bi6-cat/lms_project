@@ -1,0 +1,30 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'home/styles.css' %}">
+    <title>Trang Chủ</title>
+</head>
+<body>
+    <h1>Chào Mừng Đến Với Hệ Thống Quản Lý Học Tập</h1>
+    <nav>
+        <ul>
+            <li><a href="{% url 'home' %}">Trang Chủ</a></li>
+            <li><a href="{% url 'about' %}">Giới Thiệu</a></li>
+            <li><a href="{% url 'contact' %}">Liên Hệ</a></li>
+        </ul>
+    </nav>
+    {% comment %} login {% endcomment %}
+    {% if user.is_authenticated %}
+        <p>Xin chào, {{ user }}!</p>
+        <a href="{% url 'logout' %}">Đăng Xuất</a>
+    {% else %}
+        <a href="{% url 'login' %}">Đăng Nhập</a>
+        <a href="{% url 'register' %}">Đăng Ký</a>
+    {% endif %}
+    <p>Đây là nơi bạn có thể tìm thấy thông tin về hệ thống quản lý học tập của chúng tôi.</p>
+</body>
+</html>
