@@ -26,6 +26,7 @@ def course_list(request):
     })
 
 
+
 # Create view cho thêm khóa học
 class CourseCreateView(TeacherRequiredMixin, CreateView):
     model = Course
