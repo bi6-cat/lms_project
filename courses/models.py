@@ -22,3 +22,19 @@ class Enrollment(models.Model):
 
     def __str__(self):
         return f"{self.student} enrolled in {self.course} at {self.enrolled_at}"
+
+class Lession(models.Model):    
+    id = models.AutoField(primary_key=True)
+    course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
+    lession_name = models.CharField(max_length=255)
+    content = models.TextField(null=True, blank=True)
+    creater_at = models.DateTimeField(auto_now_add=True)
+    objects = models.Manager()
+    
+class LessionResource(models.Model):
+    id = models.AutoField(primary_key=True)
+    lession_id = models.ForeignKey(Lession, on_delete=models.CASCADE)
+    resource_name = models.CharField(max_length=255)
+    resource_content = models.FileField(upload_to='uploads/')
+    creater_at = models.DateTimeField(auto_now_add=True)
+    objects = models.Manager()
