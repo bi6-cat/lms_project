@@ -1,21 +1,48 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'users/styles.css' %}">
-    <title>Register</title>
-</head>
-<body>
-    <div class="container">
-        <h2>Đăng Ký</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Đăng Ký</button>
-        </form>
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div id="teacher_fields" style="display: none;">
+        <label for="id_department">Department:</label>
+        <input type="text" name="department" id="id_department">
     </div>
-</body>
-</html>
+
+    <div id="student_fields" style="display: none;">
+        <label for="id_school_name">School Name:</label>
+        <input type="text" name="school_name" id="id_school_name">
+    </div>
+
+    <button type="submit">Register</button>
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const roleSelect = document.querySelector("#id_role");
+        const teacherFields = document.getElementById("teacher_fields");
+        const studentFields = document.getElementById("student_fields");
+
+        function toggleFields() {
+            const role = roleSelect.value;
+            if (role === "teacher") {
+                teacherFields.style.display = "block";
+                studentFields.style.display = "none";
+            } else if (role === "student") {
+                teacherFields.style.display = "none";
+                studentFields.style.display = "block";
+            } else {
+                teacherFields.style.display = "none";
+                studentFields.style.display = "none";
+            }
+        }
+
+        roleSelect.addEventListener("change", toggleFields);
+        toggleFields();  // Gọi để chắc chắn hiển thị đúng khi tải trang
+    });
+</script>
+
+
+{% endblock %}

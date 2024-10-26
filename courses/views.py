@@ -12,7 +12,7 @@ class TeacherRequiredMixin(UserPassesTestMixin):
         return self.request.user.role == 'teacher'
 
     def handle_no_permission(self):
-        return redirect('home')  # Chuyển hướng đến trang chủ nếu không đủ quyền
+        return redirect('403')  # Chuyển hướng đến trang chủ nếu không đủ quyền
 
 
 

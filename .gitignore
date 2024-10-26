@@ -9,7 +9,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
 # Thư mục và file do Django tạo ra
 *.log
 *.sqlite3

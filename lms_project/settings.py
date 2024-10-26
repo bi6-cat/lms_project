@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.TeacherRequiredMiddleware', # Middleware kiểm tra quyền giáo viên
 ]
 
 ROOT_URLCONF = 'lms_project.urls'
@@ -95,7 +96,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'lms_py',
         'USER': 'root',
-        'PASSWORD': '123456789',
+        'PASSWORD': 'abcd@1234',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -152,3 +153,6 @@ LOGIN_REDIRECT_URL = 'home'  # Đường dẫn sau khi đăng nhập thành côn
 LOGOUT_REDIRECT_URL = 'login'  # Đường dẫn sau khi đăng xuất
 
 AUTH_USER_MODEL = 'users.User'
+
+LOGIN_URL = '/users/login/'  # URL đăng nhập
+
