@@ -95,7 +95,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'lms_py',
         'USER': 'root',
-        'PASSWORD': 'abcd@1234',
+        'PASSWORD': '123456789',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -146,6 +146,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 LOGIN_REDIRECT_URL = 'home'  # Đường dẫn sau khi đăng nhập thành công
 LOGOUT_REDIRECT_URL = 'login'  # Đường dẫn sau khi đăng xuất

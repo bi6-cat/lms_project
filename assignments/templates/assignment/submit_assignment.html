@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h2>Nop  bai  mới</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Nop bai </button>
+</form>
+<a href="#">Quay lại danh sách</a>
+{% endblock %}
