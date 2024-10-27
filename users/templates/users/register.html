@@ -1,48 +1,207 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Đăng Ký Tài Khoản{% endblock %}
+
 {% block content %}
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                    <h3 class="fw-bold">Đăng Ký Tài Khoản</h3>
+                    <p class="text-muted">Vui lòng điền đầy đủ thông tin bên dưới</p>
+                </div>
 
-    <div id="teacher_fields" style="display: none;">
-        <label for="id_department">Department:</label>
-        <input type="text" name="department" id="id_department">
+                <form method="POST" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <p class="mb-0"><i class="fas fa-exclamation-circle me-2"></i>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Email field -->
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                               id="id_email" name="email" placeholder="Email" required>
+                        <label for="id_email">Email</label>
+                        {% if form.email.errors %}
+                            <div class="invalid-feedback">{{ form.email.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Name field -->
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                               id="id_name1" name="first_name" placeholder="Tên họ" required>
+                        <label for="id_name1">Họ</label>
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback">{{ form.username.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                               id="id_name2" name="last_name" placeholder="Tên" required>
+                        <label for="id_name2">Tên</label>
+                        {% if form.username.errors %}
+                            <div class="invalid-feedback">{{ form.username.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+
+                    <!-- Password fields -->
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control {% if form.password1.errors %}is-invalid{% endif %}" 
+                               id="id_password1" name="password1" placeholder="Mật khẩu" required>
+                        <label for="id_password1">Mật khẩu</label>
+                        {% if form.password1.errors %}
+                            <div class="invalid-feedback">{{ form.password1.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control {% if form.password2.errors %}is-invalid{% endif %}" 
+                               id="id_password2" name="password2" placeholder="Xác nhận mật khẩu" required>
+                        <label for="id_password2">Xác nhận mật khẩu</label>
+                        {% if form.password2.errors %}
+                            <div class="invalid-feedback">{{ form.password2.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Role Selection -->
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="id_role" name="role" required>
+                            <option value="">Chọn vai trò</option>
+                            <option value="student">Học viên</option>
+                            <option value="teacher">Giảng viên</option>
+                        </select>
+                        <label for="id_role">Vai trò của bạn</label>
+                    </div>
+
+                    <!-- Teacher Fields -->
+                    <div id="teacher_fields" style="display: none;">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="department" 
+                                   id="id_department" placeholder="Khoa/Bộ môn">
+                            <label for="id_department">Khoa/Bộ môn</label>
+                        </div>
+                    </div>
+
+                    <!-- Student Fields -->
+                    <div id="student_fields" style="display: none;">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" name="school_name" 
+                                   id="id_school_name" placeholder="Tên trường">
+                            <label for="id_school_name">Tên trường</label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Đăng Ký
+                        </button>
+                        <a href="{% url 'login' %}" class="btn btn-light btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Đã có tài khoản? Đăng nhập
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div id="student_fields" style="display: none;">
-        <label for="id_school_name">School Name:</label>
-        <input type="text" name="school_name" id="id_school_name">
-    </div>
+<style>
+    .card {
+        transition: transform 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
 
-    <button type="submit">Register</button>
-</form>
+    .form-floating>.form-control,
+    .form-floating>.form-select {
+        height: calc(3.5rem + 2px);
+        line-height: 1.25;
+    }
 
+    .btn-lg {
+        padding: 0.75rem 1rem;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+        background-color: #1d4ed8;
+        border-color: #1d4ed8;
+    }
+
+    .btn-light {
+        background-color: #f8fafc;
+        border-color: #e2e8f0;
+    }
+
+    .btn-light:hover {
+        background-color: #e2e8f0;
+        border-color: #cbd5e1;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+    }
+</style>
+
+{% block extra_js %}
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const roleSelect = document.querySelector("#id_role");
-        const teacherFields = document.getElementById("teacher_fields");
-        const studentFields = document.getElementById("student_fields");
+document.addEventListener("DOMContentLoaded", function () {
+    const roleSelect = document.querySelector("#id_role");
+    const teacherFields = document.getElementById("teacher_fields");
+    const studentFields = document.getElementById("student_fields");
 
-        function toggleFields() {
-            const role = roleSelect.value;
-            if (role === "teacher") {
-                teacherFields.style.display = "block";
-                studentFields.style.display = "none";
-            } else if (role === "student") {
-                teacherFields.style.display = "none";
-                studentFields.style.display = "block";
-            } else {
-                teacherFields.style.display = "none";
-                studentFields.style.display = "none";
-            }
+    function toggleFields() {
+        const role = roleSelect.value;
+        if (role === "teacher") {
+            teacherFields.style.display = "block";
+            studentFields.style.display = "none";
+        } else if (role === "student") {
+            teacherFields.style.display = "none";
+            studentFields.style.display = "block";
+        } else {
+            teacherFields.style.display = "none";
+            studentFields.style.display = "none";
         }
+    }
 
-        roleSelect.addEventListener("change", toggleFields);
-        toggleFields();  // Gọi để chắc chắn hiển thị đúng khi tải trang
-    });
+    roleSelect.addEventListener("change", toggleFields);
+    toggleFields();
+
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+});
 </script>
-
+{% endblock %}
 
 {% endblock %}
