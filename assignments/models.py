@@ -1,10 +1,10 @@
 from django.db import models
-from courses.models import Course, Lession
 from users.models import Student
+from lessons.models import Lesson
 
 # Create your models here.
 class Assignment(models.Model):
-    lession = models.ForeignKey(Lession, on_delete=models.CASCADE)
+    lession = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
     create_at = models.DateTimeField(auto_now_add=True)
