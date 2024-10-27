@@ -3,7 +3,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
-from courses.models import Course, Lession
+from courses.models import Course
+from lessons.models import Lesson
 from .models import Assignment, AssignmentResource
 from assignments.forms import AssignmentForm, SubmitAssignmentForm
 
@@ -25,7 +26,7 @@ class AssignmentCreateView(TeacherRequiredMixin, CreateView):
     success_url = reverse_lazy('show_assignment') 
     def form_valid(self, form):
         lession_id = self.kwargs.get('lession_id')
-        lession = get_object_or_404(Lession, id=lession_id)
+        lession = get_object_or_404(Lesson, id=lession_id)
         # assignment = form.save(commit=False)
         form.instance.lession = lession # 
         return super().form_valid(form)
