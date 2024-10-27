@@ -1,50 +1,253 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 {% load static %}
-{% block content %}
-<h2>Danh Sách Khóa Học</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Tiêu Đề</th>
-            <th>Giáo Viên</th>
-            <th>Ngày Bắt Đầu</th>
-            <th>Ngày Kết Thúc</th>
-            <th>Hành Động</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% if courses %}
-            {% for course in courses %}
-            <tr>
-                <td><a href="{% url 'course_detail' course.id %}">{{ course.title }}</a></td>
-                <td>{{ course.teacher }}</td>
-                <td>{{ course.start_date }}</td>
-                <td>{{ course.end_date }}</td>
-                {% if user.role == 'teacher' %}
-                <td>
-                    <a href="{% url 'edit_course' course.id %}">Chỉnh Sửa</a> |
-                    <a href="{% url 'delete_course' course.id %}">Xóa</a>
-                </td>
-                {% else %}
-                <td>
-                    {% if course in enrolled_courses %}
-                        <a href="{% url 'course_detail' course.id %}" class="btn btn-secondary">Đã đăng ký</a>
-                    {% else %}
-                        <a href="{% url 'course_detail' course.id %}" class="btn btn-primary">Xem chi tiết</a>
-                    {% endif %}
-                </td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="5">Không có khóa học nào.</td>
-            </tr>
-        {% endif %}
-    </tbody>
-</table>
-{% if user.role == 'teacher' %}
-    <a href="{% url 'add_course' %}">Tạo Khóa Học Mới</a>
-{% endif %}
 
+{% block content %}
+<div class="course-container">
+    <div class="course-header">
+        <h1>Danh Sách Khóa Học</h1>
+        {% if user.role == 'teacher' %}
+        <a href="{% url 'add_course' %}" class="create-course-btn">
+            <i class="fas fa-plus"></i> Tạo Khóa Học Mới
+        </a>
+        {% endif %}
+    </div>
+
+    {% if courses %}
+    <div class="course-grid">
+        {% for course in courses %}
+        <div class="course-card">
+            <div class="course-card-header">
+                <h3>{{ course.title }}</h3>
+                {% if user.role == 'teacher' %}
+                
+                {% endif %}
+            </div>
+            
+            <div class="course-info">
+                <div class="info-item">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>{{ course.teacher }}</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>{{ course.start_date }}</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>{{ course.end_date }}</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-users"></i>
+                    <span>
+                        {% if course.id in course_student_counts %}
+                            {{ course_student_counts|get_item:course.id }}
+                        {% else %}
+                            0
+                        {% endif %}
+                        học sinh
+                    </span>
+                </div>
+            </div>
+
+            <div class="course-footer">
+                {% if user.role != 'teacher' %}
+                    {% if course.id in enrolled_courses %}
+                        <button class="btn-enrolled" disabled>
+                            <i class="fas fa-check"></i> Đã đăng ký
+                        </button>
+                        <p></p>
+                        <a href="{% url 'course_detail' course.id %}" class="btn-details">
+                            <i class="fas fa-info-circle"></i> Xem chi tiết
+                        </a>
+                    {% else %}
+                        <a href="{% url 'course_detail' course.id %}" class="btn-details">
+                            <i class="fas fa-info-circle"></i> Xem chi tiết
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'course_detail' course.id %}" class="btn-details">
+                        <i class="fas fa-info-circle"></i> Xem chi tiết
+                    </a>
+                    <div class="course-actions d-flex justify-content-between w-100" style="width: 98%;">
+                        <a href="{% url 'edit_course' course.id %}" class="btn-edit btn btn-primary flex-grow-1 my-2">
+                            <i class="fas fa-edit"></i> Chỉnh sửa
+                        </a>
+                        <form method="post" action="{% url 'delete_course' course.id %}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa khóa học này không?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-delete btn btn-danger flex-grow-1 my-2">
+                                <i class="fas fa-trash "></i>
+                            </button>
+                        </form>
+                    </div>
+                    
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-courses">
+        <i class="fas fa-book-open"></i>
+        <p>Không có khóa học nào.</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.course-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.course-header h1 {
+    color: #2c3e50;
+    margin: 0;
+    font-size: 2rem;
+}
+
+.create-course-btn {
+    background-color: #2ecc71;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.create-course-btn:hover {
+    background-color: #27ae60;
+}
+
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.course-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+}
+
+.course-card-header {
+    background: #3498db;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.course-card-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.course-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-edit, .btn-delete {
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.btn-edit {
+    background: #f39c12;
+    border: none;
+}
+
+.btn-delete {
+    background: #e74c3c;
+}
+
+.course-info {
+    padding: 20px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: #7f8c8d;
+}
+
+.info-item i {
+    width: 20px;
+    margin-right: 10px;
+    color: #3498db;
+}
+
+.course-footer {
+    padding: 15px;
+    border-top: 1px solid #ecf0f1;
+    text-align: center;
+}
+
+.btn-enrolled, .btn-details {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-enrolled {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-details {
+    background: #3498db;
+    color: white;
+}
+
+.btn-details:hover {
+    background: #2980b9;
+}
+
+.no-courses {
+    text-align: center;
+    padding: 50px;
+    color: #7f8c8d;
+}
+
+.no-courses i {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .course-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .course-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+}
+</style>
 {% endblock %}

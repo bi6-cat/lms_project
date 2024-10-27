@@ -23,16 +23,11 @@ class Enrollment(models.Model):
     def __str__(self):
         return f"{self.student} enrolled in {self.course} at {self.enrolled_at}"
 
-class Lession(models.Model):    
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    lession_name = models.CharField(max_length=255)
-    content = models.TextField(null=True, blank=True)
-    creater_at = models.DateTimeField(auto_now_add=True)
-    objects = models.Manager()
-    
-class LessionResource(models.Model):
-    lession = models.ForeignKey(Lession, on_delete=models.CASCADE)
-    resource_name = models.CharField(max_length=255)
-    resource_content = models.FileField(upload_to='uploads/')
-    creater_at = models.DateTimeField(auto_now_add=True)
-    objects = models.Manager()
+class CourseResource(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="resources")
+    resource_type = models.CharField(max_length=50, choices=[('document', 'Document'), ('video', 'Video'), ('link', 'Link')])
+    resource_file = models.FileField(upload_to='course_resources/')  # Thư mục để lưu file
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.resource_type} - {self.course.title}"
