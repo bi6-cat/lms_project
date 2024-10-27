@@ -1,0 +1,47 @@
+<!-- lesson_list.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h3>Bài học trong khóa: {{ course.course_name }}</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tên bài học</th>
+            <th>Nội dung</th>
+            <th>Ngày bắt đầu</th>
+            <th>Ngày kết thúc</th>
+            {% if user.role == 'student' %}
+                <th>Trạng thái</th>
+            {% elif user.role == 'teacher' %}
+                <th>Trạng thái</th>  <!-- Thêm cột trạng thái cho giáo viên -->
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for lesson in lessons %}
+        <tr>
+            <td>{{ lesson.lesson_title }}</td>
+            <td>{{ lesson.content|truncatewords:10 }}</td>
+            <td>{{ lesson.start_date }}</td>
+            <td>{{ lesson.end_date }}</td>
+            
+            {% if user.role == 'student' %}
+                {% with status=lessons_status %}
+                    {% if lesson.id in status %}
+                        {% with lesson_status=status %}
+                            <td>{{ lesson_status.status }}</td>
+                        {% endwith %}
+                    {% else %}
+                        <td>Chưa ghi danh</td>
+                        <td></td>
+                    {% endif %}
+                {% endwith %}
+            {% elif user.role == 'teacher' %}
+                <td>{{ lesson.status }}</td>  <!-- Hiển thị trạng thái bài học cho giáo viên -->
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

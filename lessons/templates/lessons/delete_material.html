@@ -1,0 +1,13 @@
+<!-- delete_material.html -->
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Xóa tài liệu</h2>
+  <p>Bạn có chắc chắn muốn xóa tài liệu "{{ material.resource_type }}" không?</p>
+  
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Xóa</button>
+    <a href="{% url 'lesson_detail' course.id lesson.id %}">Hủy</a>
+  </form>
+{% endblock %}
