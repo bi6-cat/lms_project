@@ -1,1 +1,53 @@
 <h1>thanh cong</h1>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách sách</title>
+    <style>
+        .options {
+            display: none; /* Ẩn tùy chọn xóa ban đầu */
+            margin-left: 10px;
+        }
+        .menu {
+            cursor: pointer; /* Thay đổi con trỏ thành kiểu tay khi hover */
+            font-size: 24px; /* Kích thước chữ cho dấu ba chấm */
+        }
+        .delete-icon {
+            display: none; /* Ẩn biểu tượng thùng rác ban đầu */
+            margin-left: 10px;
+            color: red; /* Màu cho biểu tượng thùng rác */
+            font-size: 24px; /* Kích thước chữ cho biểu tượng thùng rác */
+        }
+    </style>
+</head>
+<body>
+    <h1>Danh assignment</h1>
+    <ul id="book-list">
+
+        {% for assignment in assignments %}
+        <li>
+            
+            <a href="{% url 'delete_assignment' assignment.id %}" >{{ assignment.title }}</a>
+            
+            
+        </li>
+          {% endfor %}
+        
+    </ul>
+
+    <script>
+        // Thêm sự kiện click cho các nút dấu ba chấm
+        const menus = document.querySelectorAll('.menu');
+        menus.forEach(menu => {
+            menu.addEventListener('click', function() {
+                const options = this.nextElementSibling; // Lấy phần tử kế tiếp (tùy chọn xóa)
+                options.style.display = options.style.display === 'none' ? 'inline' : 'none'; // Chuyển đổi hiển thị
+            });
+        });
+    </script>
+</body>
+</html>

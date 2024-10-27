@@ -1,6 +1,6 @@
 
 from django import forms
-from .models import Assignment, SubmitAssignment
+from .models import Assignment, AssignmentResource, SubmitAssignment
 
 class AssignmentForm(forms.ModelForm):
     class Meta:
@@ -24,5 +24,16 @@ class SubmitAssignmentForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Nội dung bài tập'}),
         }
 
+
+class AssignmentResourceForm(forms.ModelForm):
+    class Meta:
+        model = AssignmentResource
+        fields = ['resource_type', 'resource_file', 'resource_url']
+
+        widgets = {
+            'resource_type': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Loại tài nguyên'}),
+            'resource_file': forms.FileInput(attrs={'class': 'form-control', 'placeholder': 'File tài nguyên'}),
+            'resource_url': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Đường dẫn tài nguyên'}),
+        }
 
 
