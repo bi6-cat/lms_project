@@ -1,0 +1,16 @@
+<!-- assignment_confirm_delete.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<h1>Xác Nhận Xóa</h1>
+<p>Bạn có chắc chắn muốn xóa bài tập "{{ object.title }}"?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Xóa</button>
+    <a>Hủy</a>
+</form>
+
+
+{% endblock %}

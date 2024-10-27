@@ -3,8 +3,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
-from courses.models import Course
-from .models import Assignment
+from courses.models import Course, Lession
+from .models import Assignment, AssignmentResource
 from assignments.forms import AssignmentForm, SubmitAssignmentForm
 
 # Create your views here.
@@ -25,7 +25,7 @@ class AssignmentCreateView(TeacherRequiredMixin, CreateView):
     success_url = reverse_lazy('show_assignment') 
     def form_valid(self, form):
         lession_id = self.kwargs.get('lession_id')
-        lession = get_object_or_404(Course, id=lession_id)
+        lession = get_object_or_404(Lession, id=lession_id)
         # assignment = form.save(commit=False)
         form.instance.lession = lession # 
         return super().form_valid(form)
@@ -56,20 +56,68 @@ class SubmitAssignmentWiew(CreateView):
     form_class = SubmitAssignmentForm
     template_name = 'assignment/submit_assignment.html'
     # Show den cai thong bao nop bai thanh cong
-    # success_url = reverse_lazy('show_assignment')
+    success_url = reverse_lazy('show_assignment')
     def form_valid(self, form):
         assignment_id = self.kwargs.get('assignment_id')
         assignment = get_object_or_404(Assignment, id=assignment_id)
-        student = self.request.user
+        student = self.request.user.student
         form.instance.assignment = assignment # 
         form.instance.student = student
         # assignment.save()
         return super().form_valid(form)
+    
+
+def show_all_assignment(request, lession_id):
+    assignments = Assignment.objects.filter(lession=lession_id)
+    return render(request, 'assignment/show_assignment.html', {
+        'assignments': assignments
+    })
+
+class DeleteAssignmentView(TeacherRequiredMixin,DeleteView):
+    model = Assignment
+    template_name = 'assignment/delete_assignment.html'
+    success_url = reverse_lazy('show_assignment')
+
+    def test_func(self):
+        assignment = self.get_object()
+        lession = assignment.lession
+        course = lession.course
+        teacher = course.teacher
+        #  get_object(): tra ve doi tuong xoa
+        assignment = self.get_object() 
+        if self.request.user.role == 'teacher':
+            # print(teacher)
+            # print(self.request.user.teacher)
+            return True
+        return False  # Chỉ cho phép chủ sở hữu xóa
 
 
+class UpdateAssignmentView(TeacherRequiredMixin,UpdateView):
+    model = Assignment
+    form_class = AssignmentForm
+    template_name = 'assignment/update_assignment.html'
+    success_url = reverse_lazy('show_assignment')
+    
+    def test_func(self):
+        assignment = self.get_object()
+        if self.request.user.role == 'teacher':
+            # print(teacher)
+            # print(self.request.user.teacher)
+            return True
+        return False  # Chỉ cho phép chủ sở hữu xóa
 
 
-
+class CreateAssignmentResourceView(TeacherRequiredMixin,CreateView):
+    model = AssignmentResource
+    form_class = AssignmentForm
+    template_name = 'assignment/create_assignment.html'
+    success_url = reverse_lazy('show_assignment')
+    
+    def form_valid(self, form):
+        assignment_id = self.kwargs.get('assignment_id')
+        assignment = get_object_or_404(Assignment, id=assignment_id)
+        form.instance.assignment = assignment
+        return super().form_valid(form)
 
 
 
