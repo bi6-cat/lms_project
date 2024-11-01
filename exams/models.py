@@ -1,4 +1,7 @@
+from django.db import models
 
+from courses.models import Course
+from users.models import Student
 # CREATE TABLE Exam (
 #     exam_id INT PRIMARY KEY AUTO_INCREMENT,
 #     course_id INT NOT NULL,
@@ -34,3 +37,38 @@
 #     graded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 #     UNIQUE (exam_id, student_id)
 # );
+
+
+
+class Exam(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    exam_name = models.CharField(max_length=255)
+    exam_date = models.DateField()
+    objects = models.Manager
+
+    
+class Examresult(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    total_score = models.DecimalField(max_digits=5, decimal_places=2)
+    graded_at = models.DateTimeField(auto_now_add=True)
+    objects = models.Manager()
+
+class Examkey(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    question_number = models.IntegerField()
+    correct_answer = models.CharField(max_length=1, choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')])
+    objects = models.Manager()
+
+class Examanswer(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    question_number = models.IntegerField()
+    answer = models.CharField(max_length=1, choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')])
+    objects = models.Manager()
+    
+
+
+
+
+
