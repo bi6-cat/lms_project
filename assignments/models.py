@@ -16,7 +16,7 @@ class SubmitAssignment(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     assignment_file = models.FileField(null=True, blank=True,upload_to='uploads/')
-    marks = models.IntegerField(default=0)
+    marks = models.IntegerField(null=True, blank=True)
     content = models.TextField(null=True, blank=True)
     create_at = models.DateTimeField(auto_now_add=True)
     objects = models.Manager()

@@ -35,5 +35,13 @@ class AssignmentResourceForm(forms.ModelForm):
             'resource_file': forms.FileInput(attrs={'class': 'form-control', 'placeholder': 'File tài nguyên'}),
             'resource_url': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Đường dẫn tài nguyên'}),
         }
+class AddMarkForm(forms.ModelForm):
+    class Meta:
+        model = SubmitAssignment
+        fields = ['marks']
+
+        widgets = {
+            'marks': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Điểm số'}),
+        }
 
 
