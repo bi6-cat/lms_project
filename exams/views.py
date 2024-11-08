@@ -1,11 +1,15 @@
 import csv
 import os
+from pathlib import Path
+import cv2
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.db import models
 
 from courses.models import Course
-from exams.forms import ExamForm, ExamKeyForm, KeyUpLoadForm
-from exams.models import Exam, Examkey
+from exams.Scan_score.test_scanner import Test_Scanner
+from exams.forms import ExamForm, ExamKeyForm, KeyUpLoadForm, SubmitAnswerForm
+from exams.models import Exam, Examkey, SubmitExam
 from lms_project import settings
 from users.models import Student
 from django.shortcuts import get_object_or_404, redirect, render
@@ -147,4 +151,74 @@ def transform_answer(request, exam_id):
             #  Cho nay su dung redict de khi tai lai trang no k tu upload lai file
             return render(request, 'exams/show_error.html', {'message': message})
     return render(request, 'exams/get_examkey.html', {'form': KeyUpLoadForm()})
+
+# Ham nop bai tu hoc sinh
+class SubmitAnswerView(CreateView):
+    model = SubmitExam
+    form_class = SubmitAnswerForm
+    template_name = 'exams/submit_answer.html'
+    success_url = reverse_lazy('show_exam')
+    def form_valid(self, form):
+        exam_id = self.kwargs.get('exam_id')
+        exam = get_object_or_404(Exam, id=exam_id)
+        student = self.request.user.student
+        form.instance.exam = exam
+        form.instance.student = student
+        return super().form_valid(form)
+    
+
+    
+
+
+from users.decorators import teacher_required
+from exams.Scan_score import *
+from exams.Scan_score.main_scanner import main
+from exams.Scan_score.test_scanner import Test_Scanner
+import os
+from exams.Scan_score import utlis
+def get_files_inTestPics():
+    return [x for x in os.listdir('D:/Code/Python/Project_Python/lms_project/media/uploads_key_student/images')] #Duong dan tuyet doi ta co the thay bang duong dan tuong doi
+
+# @teacher_required
+def cham_bai(request,exam_id):
+    # Lay danh sách đáp án
+    # exam = Exam.objects.get(id = exam_id)
+    # key = Examkey.objects.filter(exam = exam)
+    answer = ["A"] * 50
+    Student_list_TestScore = []
+    studentss = ""
+    # media_path = Path(settings.MEDIA_ROOT) / 'uploads_key_student' / 'images'
+    # paths = list(media_path.iterdir())  # Quét tất cả các tệp trong thư mục
+    paths1 = Path('D:/Code/Python/Project_Python/lms_project/media/uploads_key_student/images')
+    # path = "D:/Code/Python/Project_Python/lms_project/exams/Scan_score/images/img1.jpg"
+    # folder_path = Path('D:/Code/Python/Project_Python/lms_project/media/uploads_key_student/images')
+    paths = [p for p in paths1.iterdir() if p.is_file()]  # Chỉ lấy các tệp (không phải thư mục)
+    # print(paths)
+    studentss = str(len(paths))
+    # studentss = paths[0]
+    for path in paths:
+        
+        widthImg = 800
+        heightImg = 800
+        img = cv2.imread(path)
+        img = cv2.resize(img, (widthImg, heightImg))
+        T_scanner = Test_Scanner(answer, img)
+        result = T_scanner.get_Infor()
+        print(result)
+        #   return [IdStudent, totalScore, IdExam]
+        # id_student =  int(result[0][0:3])
+        score = result[1]
+        # print(id_student)
+        studentss = str(int(result[0][0:3]))
+        
+    return render(request, 'exams/cham_bai.html',{'student':studentss})
+        
+
+
+
+
+
+
+        
+
                 

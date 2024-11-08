@@ -1,6 +1,6 @@
 from django import forms
 
-from exams.models import Exam, Examkey
+from exams.models import Exam, Examkey, SubmitExam
 
 class ExamForm(forms.ModelForm):
     class Meta:
@@ -23,3 +23,12 @@ class ExamKeyForm(forms.ModelForm):
 
 class KeyUpLoadForm(forms.Form):
     file = forms.FileField(label='Chọn file đáp án', widget=forms.FileInput(attrs={'class': 'form-control'}))
+
+class SubmitAnswerForm(forms.ModelForm):
+    class Meta:
+        model = SubmitExam
+        fields = ['exam_file']
+        widgets = {
+            'exam_file': forms.FileInput(attrs={'class': 'form-control', 'placeholder': 'File đáp án'})
+        }
+
