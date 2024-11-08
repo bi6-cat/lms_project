@@ -67,7 +67,22 @@ class Examanswer(models.Model):
     answer = models.CharField(max_length=1, choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')])
     objects = models.Manager()
     
+# class SubmitAssignment(models.Model):
+#     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
+#     student = models.ForeignKey(Student, on_delete=models.CASCADE)
+#     assignment_file = models.FileField(null=True, blank=True,upload_to='uploads/')
+#     marks = models.IntegerField(null=True, blank=True)
+#     content = models.TextField(null=True, blank=True)
+#     create_at = models.DateTimeField(auto_now_add=True)
+#     objects = models.Manager()
 
+class SubmitExam(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    exam_file = models.FileField(null=True, blank=True,upload_to='uploads_key_student/')
+    marks = models.IntegerField(null=True, blank=True)  
+    create_at = models.DateTimeField(auto_now_add=True)
+    objects = models.Manager()
 
 
 
