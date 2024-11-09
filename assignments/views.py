@@ -26,10 +26,10 @@ class AssignmentCreateView(TeacherRequiredMixin, CreateView):
     template_name = 'assignment/create_assignment.html'
     success_url = reverse_lazy('show_assignment') 
     def form_valid(self, form):
-        lession_id = self.kwargs.get('lession_id')
-        lession = get_object_or_404(Lesson, id=lession_id)
+        lesson_id = self.kwargs.get('lesson_id')
+        lesson = get_object_or_404(Lesson, id=lesson_id)
         # assignment = form.save(commit=False)
-        form.instance.lession = lession # 
+        form.instance.lesson = lesson # 
         return super().form_valid(form)
         # return redirect('show_assignment')
     # def create_success(self):
@@ -42,16 +42,6 @@ def show_assignment(request):
         'assignments': assignments
     })
 
-# 5. Assignments App (Quản lý bài tập)
-# /assignments/: Danh sách tất cả các bài tập của học sinh.
-# /assignments/add/: Tạo bài tập mới (Teacher).
-# /assignments/<int:assignment_id>/submit/: Nộp bài tập (Student).
-# /assignments/<int:assignment_id>/edit/: Chỉnh sửa bài tập (Teacher).
-# /assignments/<int:assignment_id>/delete/: Xóa bài tập (Teacher/Admin).
-# /assignments/<int:assignment_id>/grade/: Chấm điểm bài tập (Teacher).
-# /assignments/<int:assignment_id>/feedback/: Xem phản hồi và điểm số từ Teacher (Student).
-# /assignments/<int:assignment_id>/status/: Xem trạng thái nộp bài (Student/Teacher).
-# Ngoài ListView và DetailView, còn có các view khác như CreateView, UpdateView, và DeleteView.
 
 def show_error(request):
     return render(request, 'assignment/show_error.html')
@@ -75,8 +65,8 @@ class SubmitAssignmentWiew(CreateView):
         return super().form_valid(form)
     
 
-def show_all_assignment(request, lession_id):
-    assignments = Assignment.objects.filter(lession=lession_id)
+def show_all_assignment(request, lesson_id):
+    assignments = Assignment.objects.filter(lesson=lesson_id)
     return render(request, 'assignment/show_assignment.html', {
         'assignments': assignments
     })
@@ -89,8 +79,8 @@ class DeleteAssignmentView(TeacherRequiredMixin,DeleteView):
     #  ham tést_func() thuong dung cho TeacherRequiredMixin
     def test_func(self):
         assignment = self.get_object()
-        lession = assignment.lession
-        course = lession.course
+        lesson = assignment.lesson
+        course = lesson.course
         teacher = course.teacher
         #  get_object(): tra ve doi tuong xoa
         assignment = self.get_object() 
@@ -140,6 +130,33 @@ class AddMarkView(TeacherRequiredMixin,UpdateView):
         if self.request.user.role == 'teacher':
             return True
         return False
+    
+
+def assignment_submission_status(request, id_assignment):
+    # Lấy Assignment theo id
+    assignment = get_object_or_404(Assignment, id=id_assignment)
+    
+    # Lấy khóa học từ bài học
+    course = assignment.lesson.course
+
+    # Lấy danh sách học sinh đã đăng ký vào khóa học
+    enrollments = Enrollment.objects.filter(course=course)
+    students_in_course = [enrollment.student for enrollment in enrollments]
+
+    # Lấy danh sách học sinh đã nộp bài
+    students_submitted_ids = SubmitAssignment.objects.filter(assignment=assignment).values_list('student', flat=True)
+    
+    # Phân loại học sinh đã nộp và chưa nộp
+    students_submitted = [student for student in students_in_course if student.id in students_submitted_ids]
+    students_not_submitted = [student for student in students_in_course if student.id not in students_submitted_ids]
+
+    return render(request, 'assignment/assignment_submission_status.html', {
+        'assignment': assignment,
+        'course': course,
+        'students_submitted': students_submitted,
+        'students_not_submitted': students_not_submitted,
+    })
+
 
 #  Xem phan hoi va diem so cua hoc sinh. Thoi m tu viet di quang a. 
 # M chi can viet ham for la ra
@@ -153,60 +170,15 @@ class AddMarkView(TeacherRequiredMixin,UpdateView):
 #     })
 
 
-# Danh sach cac hoc sinh chua nop bai
-def student_not_submit(request, assignment_id):
-    assignment = get_object_or_404(Assignment, id=assignment_id)
-    students = Student.objects.all()
-    submit_assignments = SubmitAssignment.objects.filter(assignment=assignment)
-    return render(request, 'assignment/student_not_submit.html', {
-        'students': students,
-        'submit_assignments': submit_assignments
-    })
-
-# Trang thai nop bai cua hoc sinh
-def show_status_submit(request, id_submit_assignment):
-
-    submit_assignment = get_object_or_404(SubmitAssignment, id=id_submit_assignment)
-    message = 'Da nop bai'
-    if(submit_assignment.content == None or submit_assignment.assignment_file == None):
-        message = 'Chua nop bai'
-    return render(request, 'assignment/show_status_submit.html', {
-        'message': message
-    })
-
-# In ra danh sach hoc sinh chua nop bai
-
-def student_not_submit(request, id_assignment):
-    assignment = get_object_or_404(Assignment, id=id_assignment)
-    course = assignment.lession.course
-    enrollments = Enrollment.objects.filter(course=course)
-    # students = [enrollment.student for enrollment in enrollments]
-    submit_assignments = SubmitAssignment.objects.filter(assignment=assignment)
-    student_submitted = []
-    for x in submit_assignments:
-        stu = Student.objects.get(id=x.student.user.id)
-        print(stu.user.email)
-        student_submitted.append(stu.user.email)
-    student_not_submit = []
-    for x in enrollments:
-        stu = Student.objects.get(id=x.student.user.id)
-        # print(stu.email)
-        if stu.user.email not in student_submitted:
-            student_not_submit.append(stu.user)
-    return render(request, 'assignment/student_not_submit.html', {
-        'students': student_not_submit,
-    })
-
-    
-
-
-
-
-
-
-
-
-
+# 5. Assignments App (Quản lý bài tập)
+# /assignments/: Danh sách tất cả các bài tập của học sinh.
+# /assignments/add/: Tạo bài tập mới (Teacher).
+# /assignments/<int:assignment_id>/submit/: Nộp bài tập (Student).
+# /assignments/<int:assignment_id>/edit/: Chỉnh sửa bài tập (Teacher).
+# /assignments/<int:assignment_id>/delete/: Xóa bài tập (Teacher/Admin).
+# /assignments/<int:assignment_id>/grade/: Chấm điểm bài tập (Teacher).
+# /assignments/<int:assignment_id>/status/: Xem trạng thái nộp bài (Student/Teacher).
+# Ngoài ListView và DetailView, còn có các view khác như CreateView, UpdateView, và DeleteView.
 
 
 

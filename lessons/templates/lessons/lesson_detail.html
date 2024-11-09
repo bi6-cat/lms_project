@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% load lesson_filters %}
 {% block title %}{{ lesson.lesson_title }} - {{ course.course_name }}{% endblock %}
 
 {% block content %}
@@ -41,6 +41,89 @@
                         <!-- Lesson Content -->
                         <div class="lesson-content mb-4">
                             {{ lesson.content|safe }}
+                        </div>
+                        <div class="assignments-section mb-4">
+                            <h4 class="mb-3">
+                                <i class="fas fa-tasks me-2"></i>
+                                Bài tập
+                            </h4>
+                            
+                            {% if user.role == 'teacher' %}
+                            <div class="mb-3">
+                                <a href="{% url 'create_assignment' lesson.id %}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Thêm bài tập
+                                </a>
+                            </div>
+                            {% endif %}
+                        
+                            {% if assignments %}
+                            <div class="list-group">
+                                {% for assignment in assignments %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="mb-1">{{ assignment.title }}</h5>
+                                            <p class="mb-1 text-muted">
+                                                <i class="far fa-clock me-2"></i>
+                                                Hạn nộp: {{ assignment.deadline|date:"d/m/Y H:i" }}
+                                            </p>
+                                        </div>
+                                        <div class="btn-group">
+                                            {% if user.role == 'student' %}
+                                                {% if has_submitted %}
+                                                    <span class="badge bg-success">Đã nộp</span>
+                                                {% else %}
+                                                    <a href="{% url 'submit_assignment' assignment.id %}" 
+                                                       class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-upload me-1"></i>Nộp bài
+                                                    </a>
+                                                {% endif %}
+                                            {% elif user.role == 'teacher' %}
+                                                <a href="{% url 'assignment_submission_status' assignment.id %}" 
+                                                   class="btn btn-outline-info btn-sm me-2">
+                                                    <i class="fas fa-users me-1"></i>DS nộp bài
+                                                </a>
+                                                <a href="{% url 'update_assignment' assignment.id %}" 
+                                                   class="btn btn-outline-warning btn-sm me-2">
+                                                    <i class="fas fa-edit me-1"></i>Sửa
+                                                </a>
+                                                <a href="{% url 'delete_assignment' assignment.id %}" 
+                                                   class="btn btn-outline-danger btn-sm">
+                                                    <i class="fas fa-trash me-1"></i>Xóa
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    {% if assignment.description %}
+                                    <div class="mt-2">
+                                        <p class="mb-0">{{ assignment.description }}</p>
+                                    </div>
+                                    {% endif %}
+                        
+                                    {% if assignment.resources.all %}
+                                    <div class="mt-2">
+                                        <h6 class="mb-2">Tài liệu đính kèm:</h6>
+                                        <div class="list-group list-group-flush">
+                                            {% for resource in assignment.resources.all %}
+                                            <a href="{{ resource.file.url }}" 
+                                               class="list-group-item list-group-item-action py-2">
+                                                <i class="fas fa-paperclip me-2"></i>
+                                                {{ resource.file.name }}
+                                            </a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Chưa có bài tập nào cho bài học này
+                            </div>
+                            {% endif %}
                         </div>
 
                         <!-- Lesson Resources -->
@@ -233,6 +316,36 @@
         .col-lg-4 {
             margin-top: 2rem;
         }
+    }
+    .assignments-section .list-group-item {
+        background-color: #fff;
+        border: 1px solid rgba(0,0,0,.125);
+        margin-bottom: 1rem;
+        padding: 1.25rem;
+    }
+    
+    .assignments-section .badge {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .assignments-section .btn-sm {
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .assignments-section .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .assignments-section .list-group-flush .list-group-item {
+        border: none;
+        padding: 0.5rem 0;
+        margin-bottom: 0;
+    }
+    
+    .assignments-section .list-group-flush .list-group-item:hover {
+        background-color: transparent;
+        color: #0d6efd;
     }
 </style>
 

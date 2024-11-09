@@ -155,4 +155,3 @@ LOGOUT_REDIRECT_URL = 'login'  # Đường dẫn sau khi đăng xuất
 AUTH_USER_MODEL = 'users.User'
 
 LOGIN_URL = '/users/login/'  # URL đăng nhập
-

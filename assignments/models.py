@@ -4,7 +4,7 @@ from lessons.models import Lesson
 
 # Create your models here.
 class Assignment(models.Model):
-    lession = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
     create_at = models.DateTimeField(auto_now_add=True)

@@ -2,8 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from assignments.models import Assignment, SubmitAssignment
 from courses.models import Course, Enrollment
 from users.decorators import teacher_required
+from users.models import Student
 from .models import Lesson, LessonResource
 from .forms import LessonForm, LessonResourceForm, ResourceForm
 
@@ -48,7 +50,18 @@ def lesson_detail(request, course_id, lesson_id):
     course = get_object_or_404(Course, id=course_id)
     lesson = get_object_or_404(Lesson, id=lesson_id, course=course)
     materials = LessonResource.objects.filter(lesson=lesson)
-    return render(request, 'lessons/lesson_detail.html', {'course': course, 'lesson': lesson, 'materials': materials})
+    assignments = Assignment.objects.filter(lesson=lesson)
+    student = Student.objects.filter(user=request.user).first()
+
+    has_submitted = SubmitAssignment.objects.filter(assignment__lesson=lesson, student = student).exists()
+
+    return render(request, 'lessons/lesson_detail.html', {
+        'course': course,
+        'lesson': lesson,
+        'materials': materials,
+        'assignments':assignments,
+        'has_submitted': has_submitted,
+    } )
 
 @login_required
 @teacher_required

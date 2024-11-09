@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-tasks me-2"></i>
+                        {{ assignment.title }}
+                    </h2>
+                    <p class="mb-0 mt-2">
+                        <i class="fas fa-book-open me-2"></i>
+                        Khóa học: {{ course.title }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Status Cards -->
+    <div class="row">
+        <!-- Students Who Submitted -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="h5 mb-0">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Đã nộp bài ({{ students_submitted|length }} học sinh)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if students_submitted %}
+                        <div class="list-group list-group-flush">
+                            {% for student in students_submitted %}
+                                <div class="list-group-item d-flex align-items-center">
+                                    <div class="avatar bg-success text-white rounded-circle me-3">
+                                        {{ student.first_name|make_list|first|upper }}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ student.first_name }} {{ student.last_name }}</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-envelope me-1"></i>
+                                            {{ student.email }}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center my-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Không có học sinh nào đã nộp bài
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Who Haven't Submitted -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="h5 mb-0">
+                        <i class="fas fa-clock me-2"></i>
+                        Chưa nộp bài ({{ students_not_submitted|length }} học sinh)
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if students_not_submitted %}
+                        <div class="list-group list-group-flush">
+                            {% for student in students_not_submitted %}
+                                <div class="list-group-item d-flex align-items-center">
+                                    <div class="avatar bg-warning text-dark rounded-circle me-3">
+                                        {{ student.first_name|make_list|first|upper }}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ student.first_name }} {{ student.last_name }}</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-envelope me-1"></i>
+                                            {{ student.email }}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center my-4">
+                            <i class="fas fa-check-double me-2"></i>
+                            Tất cả học sinh đã nộp bài
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.card-title {
+    font-weight: 600;
+}
+
+.text-muted {
+    font-size: 0.875rem;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+}
+</style>
+{% endblock %}
