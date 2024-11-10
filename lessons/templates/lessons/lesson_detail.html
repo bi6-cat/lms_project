@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load lesson_filters %}
+{% load custom_filters %}
+
 {% block title %}{{ lesson.lesson_title }} - {{ course.course_name }}{% endblock %}
 
 {% block content %}
-<div class="lesson-detail-wrapper py-5">
+<div class="lesson-detail-wrapper">
     <div class="container">
         <!-- Course Navigation -->
         <nav aria-label="breadcrumb" class="mb-4">
@@ -42,6 +44,48 @@
                         <div class="lesson-content mb-4">
                             {{ lesson.content|safe }}
                         </div>
+
+
+                        <!-- Lesson Resources -->
+                        {% if materials %}
+                        <div class="lesson-resources">
+                            <h4 class="mb-3">
+                                <i class="fas fa-paperclip me-2"></i>
+                                Tài liệu đính kèm
+                            </h4>
+                            <div class="list-group">
+                                {% for material in materials %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        {% if material.resource_type == 'document' %}
+                                            <i class="fas fa-file-pdf text-danger me-2"></i>
+                                        {% elif material.resource_type == 'video' %}
+                                            <i class="fas fa-file-video text-primary me-2"></i>
+                                        {% elif material.resource_type == 'audio' %}
+                                            <i class="fas fa-file-audio text-success me-2"></i>
+                                        {% endif %}
+                                        {{ material.get_resource_type_display }}
+                                    </div>
+                                    <div class="btn-group ">
+                                        <a href="{{ material.resource_file.url }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-download me-1"></i>
+                                            Tải xuống
+                                        </a>
+                                        <form method="post" action="{% url 'delete_material' course.id lesson.id material.id %}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tài liệu này không?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" style="margin-left: 4px;">
+                                                <i class="fas fa-trash me-1"></i>
+                                                Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Assignment -->
                         <div class="assignments-section mb-4">
                             <h4 class="mb-3">
                                 <i class="fas fa-tasks me-2"></i>
@@ -65,12 +109,12 @@
                                             <h5 class="mb-1">{{ assignment.title }}</h5>
                                             <p class="mb-1 text-muted">
                                                 <i class="far fa-clock me-2"></i>
-                                                Hạn nộp: {{ assignment.deadline|date:"d/m/Y H:i" }}
+                                                Hạn nộp: {{ assignment.due_date|date:"d/m/Y H:i" }}
                                             </p>
                                         </div>
                                         <div class="btn-group">
                                             {% if user.role == 'student' %}
-                                                {% if has_submitted %}
+                                                {% if submission_status|get_item:assignment.id %}
                                                     <span class="badge bg-success">Đã nộp</span>
                                                 {% else %}
                                                     <a href="{% url 'submit_assignment' assignment.id %}" 
@@ -87,10 +131,10 @@
                                                    class="btn btn-outline-warning btn-sm me-2">
                                                     <i class="fas fa-edit me-1"></i>Sửa
                                                 </a>
-                                                <a href="{% url 'delete_assignment' assignment.id %}" 
-                                                   class="btn btn-outline-danger btn-sm">
-                                                    <i class="fas fa-trash me-1"></i>Xóa
-                                                </a>
+                                                <form method="post" action="{% url 'delete_assignment' assignment.id %}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài học này không?');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger">Xóa</button>
+                                                </form>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -101,16 +145,23 @@
                                     </div>
                                     {% endif %}
                         
-                                    {% if assignment.resources.all %}
+                                    {% if assignment.assignmentresource_set.all %}
                                     <div class="mt-2">
                                         <h6 class="mb-2">Tài liệu đính kèm:</h6>
                                         <div class="list-group list-group-flush">
-                                            {% for resource in assignment.resources.all %}
-                                            <a href="{{ resource.file.url }}" 
-                                               class="list-group-item list-group-item-action py-2">
-                                                <i class="fas fa-paperclip me-2"></i>
-                                                {{ resource.file.name }}
-                                            </a>
+                                            {% for resource in assignment.assignmentresource_set.all %}
+                                                {% if resource.resource_file %}
+                                                <a href="{{ resource.resource_file.url }}" class="list-group-item list-group-item-action py-2">
+                                                    <i class="fas fa-paperclip me-2"></i>
+                                                    {{ resource.resource_file.name }}
+                                                </a>
+                                                {% endif %}
+                                                {% if resource.resource_url %}
+                                                <a href="{{ resource.resource_url }}" class="list-group-item list-group-item-action py-2">
+                                                    <i class="fas fa-link me-2"></i>
+                                                    {{ resource.resource_url }}
+                                                </a>
+                                                {% endif %}
                                             {% endfor %}
                                         </div>
                                     </div>
@@ -126,36 +177,7 @@
                             {% endif %}
                         </div>
 
-                        <!-- Lesson Resources -->
-                        {% if materials %}
-                        <div class="lesson-resources">
-                            <h4 class="mb-3">
-                                <i class="fas fa-paperclip me-2"></i>
-                                Tài liệu đính kèm
-                            </h4>
-                            <div class="list-group">
-                                {% for material in materials %}
-                                <a href="{{ material.resource_file.url }}" 
-                                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                    <div>
-                                        {% if material.resource_type == 'document' %}
-                                            <i class="fas fa-file-pdf text-danger me-2"></i>
-                                        {% elif material.resource_type == 'video' %}
-                                            <i class="fas fa-file-video text-primary me-2"></i>
-                                        {% elif material.resource_type == 'audio' %}
-                                            <i class="fas fa-file-audio text-success me-2"></i>
-                                        {% endif %}
-                                        {{ material.get_resource_type_display }}
-                                    </div>
-                                    <span class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-download me-1"></i>
-                                        Tải xuống
-                                    </span>
-                                </a>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endif %}
+                        
                     </div>
                 </div>
 
