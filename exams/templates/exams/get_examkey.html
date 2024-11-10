@@ -1,11 +1,11 @@
-<!-- assignment_confirm_delete.html -->
+<!-- upload.html -->
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<h1>Create Assignment</h1>
+<h2>Them File Dap an</h2>
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Create Assignment</button>
+    <button type="submit">Upload</button>
 </form>
 {% endblock %}

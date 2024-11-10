@@ -11,4 +11,5 @@ urlpatterns = [
     path('assignments/', include('assignments.urls')),
     path('', include('lessons.urls')),
     path('', include('home.urls')), 
+    path('exams/', include('exams.urls')),
 ]+static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT) + static (settings.STATIC_URL, document_root = settings.STATIC_ROOT )

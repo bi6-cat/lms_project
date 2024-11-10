@@ -11,6 +11,7 @@ class LessonForm(forms.ModelForm):
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
 
+
 class LessonResourceForm(forms.ModelForm):
     class Meta:
         model = LessonResource
@@ -25,7 +26,6 @@ class ResourceForm(forms.ModelForm):
     class Meta:
         model = LessonResource
         fields = ['resource_type', 'resource_file']
-    
         widgets = {
             'resource_type': forms.Select(attrs={'class': 'form-control'}),
             'resource_file': forms.ClearableFileInput(attrs={'class': 'form-control'}),

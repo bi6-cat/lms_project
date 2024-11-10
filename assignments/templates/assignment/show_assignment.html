@@ -1,1 +1,19 @@
-<h1>thanh cong</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1>Danh sách assignment</h1>
+    <ul id="book-list">
+
+        {% for assignment in assignments %}
+        <li>
+            <a href="{% url 'delete_assignment' assignment.id %}" >{{ assignment.title }}</a>
+        </li>
+          {% endfor %}
+        
+    </ul>
+</body>
+</html>
