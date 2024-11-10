@@ -1,0 +1,54 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+0001_initial.py
+migrations/
+# Cài đặt môi trường
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+# Thư mục và file do Django tạo ra
+*.log
+*.sqlite3
+db.sqlite3
+/media
+/staticfiles
+/static/
+*.pot
+*.pyc
+*.pyo
+
+# Thư mục chứa file cấu hình
+*.py[cod]
+*.swp
+*.swo
+*.idea/
+*.vscode/
+*.coverage
+*.egg-info/
+dist/
+build/
+*.egg
+*.egg-info/
+*.manifest
+*.spec
+
+# Các tệp cài đặt của pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Cài đặt hệ thống
+.DS_Store
+Thumbs.db
+
+*.exe
+myenv/
+assignments/migrations/0001_initial.py
+assignments/migrations/0001_initial.py
+courses/migrations/0001_initial.py
+lessons/migrations/0001_initial.py
+lessons/migrations/0002_lessonresource_resource_status_and_more.py
+users/migrations/0001_initial.py

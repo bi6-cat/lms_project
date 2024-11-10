@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Thêm Bài Học Mới{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border-0 rounded-3">
+                <div class="card-body p-4">
+                    
+                    <div class="text-center mb-4">
+                        <i class="fas fa-book-reader fa-3x text-primary mb-3"></i>
+                        <h2 class="fw-bold">Thêm Bài Học Mới</h2>
+                        <p class="text-muted">Tạo nội dung bài học và tài liệu đính kèm</p>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <p class="mb-0"><i class="fas fa-exclamation-circle me-2"></i>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Tiêu đề bài học -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.lesson_title.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-heading me-2"></i>Tiêu đề bài học
+                            </label>
+                            <input type="text" name="lesson_title" 
+                                   class="form-control {% if form.lesson_title.errors %}is-invalid{% endif %}" 
+                                   id="{{ form.lesson_title.id_for_label }}"
+                                   placeholder="Nhập tiêu đề bài học"
+                                   required>
+                            {% if form.lesson_title.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.lesson_title.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Nội dung bài học -->
+                        <div class="form-group mb-3">
+                            <label for="{{ form.content.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-file-alt me-2"></i>Nội dung bài học
+                            </label>
+                            <textarea name="content" 
+                                      class="form-control rich-text-editor {% if form.content.errors %}is-invalid{% endif %}" 
+                                      id="{{ form.content.id_for_label }}"
+                                      rows="6"
+                                      placeholder="Nhập nội dung bài học"
+                                      required></textarea>
+                            {% if form.content.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.content.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Trạng thái -->
+                        <div class="form-group mb-4">
+                            <label for="{{ form.status.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-toggle-on me-2"></i>Trạng thái bài giảng
+                            </label>
+                            <select name="status" 
+                                    class="form-select {% if form.status.errors %}is-invalid{% endif %}" 
+                                    id="{{ form.status.id_for_label }}"
+                                    required>
+                                <option value="">Chọn trạng thái</option>
+                                <option value="ongoing">Đang triển khai</option>
+                                <option value="completed">Hoàn thành</option>
+                                <option value="upcoming">Sắp ra mắt</option>
+                            </select>
+                            {% if form.status.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.status.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Trạng thái -->
+                        <div class="form-group mb-4">
+                            <label for="{{ form.status.id_for_label }}" class="form-label fw-bold">
+                                <i class="fas fa-toggle-on me-2"></i>Trạng thái
+                            </label>
+                            <select name="resource_status" 
+                                    class="form-select {% if form.status.errors %}is-invalid{% endif %}" 
+                                    id="{{ form.status.id_for_label }}"
+                                    required>
+                                <option value="">Chọn trạng thái</option>
+                                <option value="draft">Bản nháp</option>
+                                <option value="published">Xuất bản</option>
+                            </select>
+                            {% if form.status.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.status.errors|join:", " }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tài liệu đính kèm -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">
+                                    <i class="fas fa-paperclip me-2"></i>Tài liệu đính kèm
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="resource_type" class="form-label">
+                                            Loại tài liệu
+                                        </label>
+                                        <select name="resource_type" 
+                                                class="form-select" 
+                                                id="resource_type">
+                                            <option value="">Chọn loại tài liệu</option>
+                                            <option value="document">Bài giảng</option>
+                                            <option value="video">Video</option>
+                                            <option value="audio">Âm thanh</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="resource_file" class="form-label">
+                                            File tài liệu
+                                        </label>
+                                        <input type="file" 
+                                               name="resource_file" 
+                                               class="form-control" 
+                                               id="resource_file">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Lưu Bài Học
+                            </button>
+                            <a href="{% url 'course_detail' course.id %}" class="btn btn-light btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Quay Lại Danh Sách
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Style code remains unchanged */
+</style>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+
+    // Preview file name when selected
+    document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+        var fileName = e.target.files[0].name;
+        var nextSibling = e.target.nextElementSibling;
+        if(nextSibling && nextSibling.classList.contains('file-name')) {
+            nextSibling.textContent = fileName;
+        } else {
+            var fileNameElement = document.createElement('div');
+            fileNameElement.classList.add('file-name', 'mt-2', 'text-muted');
+            fileNameElement.textContent = fileName;
+            e.target.parentNode.appendChild(fileNameElement);
+        }
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock %}

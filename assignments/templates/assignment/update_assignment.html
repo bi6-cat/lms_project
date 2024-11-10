@@ -1,0 +1,13 @@
+<!-- assignment_confirm_delete.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<h1>Update Assignment</h1>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Update Assignment</button>
+</form>
+    
+{% endblock %}

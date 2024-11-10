@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <h2>Xóa khóa học "{{ course.title }}"</h2>
+  <p>Bạn có chắc chắn muốn xóa khóa học này không?</p>
+  
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a href="{% url 'course_detail' course.id %}" class="btn btn-secondary">Hủy</a>
+  </form>
+{% endblock %}

@@ -61,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.TeacherRequiredMiddleware', # Middleware kiểm tra quyền giáo viên
 ]
 
 ROOT_URLCONF = 'lms_project.urls'
@@ -146,8 +147,11 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 LOGIN_REDIRECT_URL = 'home'  # Đường dẫn sau khi đăng nhập thành công
 LOGOUT_REDIRECT_URL = 'login'  # Đường dẫn sau khi đăng xuất
 
 AUTH_USER_MODEL = 'users.User'
+
+LOGIN_URL = '/users/login/'  # URL đăng nhập
