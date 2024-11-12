@@ -17,23 +17,21 @@ urlpatterns = [
     path('', views.show_assignment, name='show_assignment'),
 
     # Hiển thị tất cả Assignment cho một Lesson
-    path('show_all_assignment/<int:lesson_id>/', views.show_all_assignment, name='show_all_assignment'),
 
     # Cập nhật Assignment
-    path('update/<int:pk>/', views.UpdateAssignmentView.as_view(), name='update_assignment'),
 
     # Tạo tài nguyên cho Assignment
-    path('create_resource/<int:assignment>/', views.CreateAssignmentResourceView.as_view(), name='create_resource'),
 
     # Hiển thị lỗi
     path('show_error/', views.show_error, name='show_error'),
 
     # Thêm điểm cho Assignment
-    path('add-mark/<int:pk>/', views.AddMarkView.as_view(), name='add_mark'),
+    path('add-mark/<int:pk>/', views.GradeAssignmentView.as_view(), name='add_mark'),
 
     # Kiểm tra trạng thái nộp bài cho Assignment
     path('<int:id_assignment>/submission-status/', views.assignment_submission_status, name='assignment_submission_status'),
-
+    path('add/<int:lesson_id>/', views.AssignmentCreateView.as_view(), name='create_assignment'),
+    path('update/<int:pk>/', views.AssignmentUpdateView.as_view(), name='update_assignment'),
     # Xoá Assignment
     path('delete/<int:pk>/', views.DeleteAssignmentView.as_view(), name='delete_assignment'),
 ]

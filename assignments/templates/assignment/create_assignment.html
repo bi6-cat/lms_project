@@ -1,11 +1,11 @@
+<!-- assignment_confirm_delete.html -->
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<h2>Tạo Bài tập mới</h2>
-<form method="POST">
+<h1>Create Assignment</h1>
+<form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Tạo Khóa Học</button>
+    <button type="submit" class="btn btn-primary">Create Assignment</button>
 </form>
-<a href="#">Quay lại danh sách</a>
 {% endblock %}

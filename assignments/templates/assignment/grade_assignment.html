@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h2>Chấm điểm</h2>
+
+<!-- Display submitted assignment details -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h4>Bài làm của học sinh</h4>
+    </div>
+    <div class="card-body">
+        {% if submitted_assignment.assignment_file %}
+            <p><strong>File bài tập:</strong> <a href="{{ submitted_assignment.assignment_file.url }}" target="_blank">{{ submitted_assignment.assignment_file.name }}</a></p>
+        {% endif %}
+        {% if submitted_assignment.content %}
+            <p><strong>Nội dung:</strong> {{ submitted_assignment.content }}</p>
+        {% endif %}
+    </div>
+</div>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Xác nhận</button>
+</form>
+{% endblock %}
