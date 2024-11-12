@@ -12,6 +12,6 @@ urlpatterns = [
     path('delete_key/<int:pk>/', DeleteExamKeyView.as_view(), name='delete_key'),
     path('get_key/<int:exam_id>/',transform_answer , name='get_key'),
     path('show_exam/<int:course_id>/', show_exam, name='show_exam'),
-    path('cham_bai/<int:exam_id>/', cham_bai, name='cham_bai'),
+    path('cham_bai/<int:submitexam_id>/', cham_bai, name='cham_bai'),
     path('submit_answer/<int:exam_id>/', SubmitAnswerView.as_view(), name='submit_answer'),
 ]
