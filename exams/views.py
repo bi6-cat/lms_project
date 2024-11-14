@@ -1,3 +1,9 @@
+from users.decorators import teacher_required
+from exams.Scan_score import *
+from exams.Scan_score.main_scanner import main
+from exams.Scan_score.test_scanner import Test_Scanner
+from PIL import Image
+from exams.Scan_score import utlis
 import csv
 import os
 from pathlib import Path
@@ -16,7 +22,7 @@ from users.models import Student
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse, reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import  CreateView, UpdateView, DeleteView
 
 # Create your views here.
 # 6. Exams App (Quản lý thi trắc nghiệm)
@@ -61,16 +67,19 @@ class EditExamView(TeacherRequiredMixin, UpdateView):
     model = Exam
     form_class = ExamForm
     template_name = 'exams/edit_exam.html'
+
     def get_success_url(self):
-        # Lấy course_id từ kwargs
-        course_id = self.kwargs.get('course_id')
-        # Sử dụng course_id để tạo đường dẫn
-        return reverse_lazy('show_exam', args=[course_id])
+        # Lấy exam_id từ kwargs
+        exam_id = self.kwargs.get('exam_id')
+        # Sử dụng exam_id để tạo đường dẫn
+        return reverse_lazy('show_exam', args=[exam_id])
+
     def form_valid(self, form):
-        course_id = self.kwargs.get('course_id')
-        course = get_object_or_404(Course, id=course_id)
-        form.instance.course = course
+        exam_id = self.kwargs.get('exam_id')
+        exam = get_object_or_404(Exam, id=exam_id)
+        form.instance.exam = exam  # Gán exam vào instance của form
         return super().form_valid(form)
+
 # Xoa ky thi
 class DeleteExamView(TeacherRequiredMixin, DeleteView):
     model = Exam
@@ -89,19 +98,7 @@ class DeleteExamView(TeacherRequiredMixin, DeleteView):
         if self.request.user.role == 'teacher':
             return True
         return False
-    
-# Tao dap an cho bai thi, tao tung cau 1
-class AddExamKeyView(TeacherRequiredMixin, CreateView):
-    model = Examkey
-    form_class = ExamKeyForm
-    template_name = 'exams/add_examkey.html'
-    success_url = reverse_lazy('show_exam')
-    def form_valid(self, form):
-        exam_id = self.kwargs.get('exam_id')
-        exam = get_object_or_404(Exam, id=exam_id)
-        form.instance.exam = exam
-        return super().form_valid(form)
-    
+
 # Edit dap an cho bai thi
 class EditExamKeyView(TeacherRequiredMixin, UpdateView):
     model = Examkey
@@ -167,17 +164,7 @@ class SubmitAnswerView(CreateView):
         form.instance.student = student
         return super().form_valid(form)
     
-
     
-
-
-from users.decorators import teacher_required
-from exams.Scan_score import *
-from exams.Scan_score.main_scanner import main
-from exams.Scan_score.test_scanner import Test_Scanner
-import os
-from PIL import Image
-from exams.Scan_score import utlis
 def get_files_inTestPics():
     return [x for x in os.listdir('D:/Code/Python/Project_Python/lms_project/media/uploads_key_student/images')] #Duong dan tuyet doi ta co the thay bang duong dan tuong doi
 

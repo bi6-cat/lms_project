@@ -4,72 +4,72 @@
 {% block content %}
 <div class="container py-5">
     <!-- Course Header Section -->
-    <div class="card shadow-sm mb-5">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-8">
-                    <h1 class="display-5 fw-bold text-primary mb-3">{{ course.title }}</h1>
-                    <div class="mb-4">
-                        <span class="badge bg-primary me-2">Khóa học</span>
-                        <span class="text-muted">
-                            <i class="fas fa-calendar-alt me-2"></i>
-                            {{ course.start_date }} - {{ course.end_date }}
-                        </span>
-                    </div>
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="border rounded-circle p-2 me-3">
-                            <i class="fas fa-chalkboard-teacher fa-2x text-primary"></i>
-                        </div>
-                        <div>
-                            <p class="mb-0 text-muted">Giáo viên</p>
-                            <h5 class="mb-0">{{ course.teacher }}</h5>
-                        </div>
-                    </div>
-                    <p class="lead text-muted">{{ course.description }}</p>
+<div class="card shadow-sm mb-5">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold text-primary mb-3">{{ course.title }}</h1>
+                <div class="mb-4">
+                    <span class="badge bg-primary me-2">Khóa học</span>
+                    <span class="text-muted">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        {{ course.start_date }} - {{ course.end_date }}
+                    </span>
                 </div>
-                <div class="col-md-4">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            {% if user.is_authenticated %}
-                                {% if user.role == 'student' %}
-                                    {% if is_enrolled %}
-                                        <div class="alert alert-info mb-3">
-                                            <i class="fas fa-info-circle me-2"></i>
-                                            {{ enrollment }}
-                                        </div>
-                                        <form method="post" class="d-grid">
-                                            {% csrf_token %}
-                                            <button type="submit" formaction="{% url 'unenroll_course' course.id %}" 
-                                                    class="btn btn-danger btn-lg">
-                                                <i class="fas fa-user-minus me-2"></i>
-                                                Hủy Đăng Ký
-                                            </button>
-                                        </form>
-                                    {% else %}
-                                        <div class="d-grid">
-                                            <a href="{% url 'enroll_course' course.id %}" 
-                                               class="btn btn-primary btn-lg">
-                                                <i class="fas fa-user-plus me-2"></i>
-                                                Đăng Ký Khóa Học
-                                            </a>
-                                        </div>
-                                    {% endif %}
-                                {% elif user.role == 'teacher' %}
+                <div class="d-flex align-items-center mb-3">
+                    <div class="border rounded-circle p-2 me-3">
+                        <i class="fas fa-chalkboard-teacher fa-2x text-primary"></i>
+                    </div>
+                    <div>
+                        <p class="mb-0 text-muted">Giáo viên</p>
+                        <h5 class="mb-0">{{ course.teacher }}</h5>
+                    </div>
+                </div>
+                <p class="lead text-muted">{{ course.description }}</p>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        {% if user.is_authenticated %}
+                            {% if user.role == 'student' %}
+                                {% if is_enrolled %}
+                                    <div class="alert alert-info mb-3">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        {{ enrollment }}
+                                    </div>
+                                    <form method="post" class="d-grid">
+                                        {% csrf_token %}
+                                        <button type="submit" formaction="{% url 'unenroll_course' course.id %}" 
+                                                class="btn btn-danger btn-lg">
+                                            <i class="fas fa-user-minus me-2"></i>
+                                            Hủy Đăng Ký
+                                        </button>
+                                    </form>
+                                {% else %}
                                     <div class="d-grid">
-                                        <a href="{% url 'add_lesson' course.id %}" 
-                                           class="btn btn-success btn-lg">
-                                            <i class="fas fa-plus-circle me-2"></i>
-                                            Thêm Bài Học
+                                        <a href="{% url 'enroll_course' course.id %}" 
+                                           class="btn btn-primary btn-lg">
+                                            <i class="fas fa-user-plus me-2"></i>
+                                            Đăng Ký Khóa Học
                                         </a>
                                     </div>
                                 {% endif %}
+                            {% elif user.role == 'teacher' %}
+                                <div class="d-grid">
+                                    <a href="{% url 'enrolled_students_list' course.id %}" 
+                                       class="btn btn-info btn-lg">
+                                        <i class="fas fa-users me-2"></i>
+                                        Xem Danh Sách Học Sinh
+                                    </a>
+                                </div>
                             {% endif %}
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Navigation -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -77,105 +77,201 @@
             <i class="fas fa-arrow-left me-2"></i>
             Quay lại danh sách
         </a>
-        <h3 class="mb-0">
-            <i class="fas fa-book me-2"></i>
-            Bài học trong khóa
-        </h3>
+        <div>
+            <h3 class="mb-0 d-inline-block me-4">
+                <i class="fas fa-book me-2"></i>
+                Bài học trong khóa
+            </h3>
+            <h3 class="mb-0 d-inline-block">
+                <i class="fas fa-file-alt me-2"></i>
+                Bài kiểm tra
+            </h3>
+        </div>
     </div>
 
-    <!-- Lessons Table -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col" class="border-0">
-                                <i class="fas fa-book-open me-2"></i>
-                                Tên bài học
-                            </th>
-                            <th scope="col" class="border-0">
-                                <i class="fas fa-align-left me-2"></i>
-                                Nội dung
-                            </th>
-                            <th scope="col" class="border-0">
-                                <i class="fas fa-calendar me-2"></i>
-                                Ngày tạo
-                            </th>
-                            <th scope="col" class="border-0">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Trạng thái
-                            </th>
-                            <th scope="col" class="border-0">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Thao tác
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for lesson in lessons %}
-                        <tr>
-                            <td class="align-middle">
-                                <a href="{% url 'lesson_detail' course.id lesson.id %}">
-                                    <strong>{{ lesson.lesson_title }}</strong>
-                                </a>
-                            </td>
-                            <td class="align-middle text-muted">
-                                {{ lesson.content|truncatewords:10 }}
-                            </td>
-                            <td class="align-middle">
-                                {{ lesson.created_at|date:"d/m/Y" }}
-                            </td>
-                            <td class="align-middle">
-                                {% if user.role == 'student' %}
-                                    {% with status=lessons_status %}
-                                        {% if lesson.id in status %}
-                                            <span class="badge bg-success">
-                                                <i class="fas fa-check-circle me-1"></i>
-                                                {{ lesson.get_status_display  }}
-                                            </span>
-                                        {% else %}
-                                            <span class="badge bg-warning text-dark">
-                                                <i class="fas fa-clock me-1 fs-5"></i>
-                                                Chưa ghi danh
-                                            </span>
-                                        {% endif %}
-                                    {% endwith %}
-                                {% elif user.role == 'teacher' %}
-                                    <span class="badge bg-info m-2 p-2 fs-6">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        {{ lesson.get_status_display  }}
-                                    </span>
-                                {% endif %}
-                            </td>
-                            {% if user.role == 'teacher' %}
-                            <td class="align-middle">
-                                <div class="d-flex">
-                                    <a href="{% url 'edit_lesson' course.id lesson.id %}" class="btn btn-warning btn-sm me-2">
-                                        <i class="fas fa-edit me-1"></i>
-                                        Sửa
+    <!-- Lessons Section -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Danh sách bài học</h4>
+            {% if user.role == 'teacher' %}
+            <a href="{% url 'add_lesson' course.id %}" class="btn btn-success">
+                <i class="fas fa-plus-circle me-2"></i>
+                Thêm bài học
+            </a>
+            {% endif %}
+        </div>
+        <!-- Lessons Table -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="border-0">
+                                    <i class="fas fa-book-open me-2"></i>
+                                    Tên bài học
+                                </th>
+                                <th scope="col" class="border-0">
+                                    <i class="fas fa-align-left me-2"></i>
+                                    Nội dung
+                                </th>
+                                <th scope="col" class="border-0">
+                                    <i class="fas fa-calendar me-2"></i>
+                                    Ngày tạo
+                                </th>
+                                <th scope="col" class="border-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Trạng thái
+                                </th>
+                                <th scope="col" class="border-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Thao tác
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lesson in lessons %}
+                            <tr>
+                                <td class="align-middle">
+                                    <a href="{% url 'lesson_detail' course.id lesson.id %}">
+                                        <strong>{{ lesson.lesson_title }}</strong>
                                     </a>
-                                    <form method="post" action="{% url 'delete_lesson' course.id lesson.id %}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài học này không?');">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger btn-sm">
-                                            <i class="fas fa-trash me-1"></i>
-                                            Xóa
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                            {% elif user.role == 'student' %}
-                            <td class="align-middle">
-                                <a href="{% url 'lesson_detail' course.id lesson.id %}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-user-plus me-1"></i>
-                                    Vào học
-                                </a>
-                            {% endif %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                </td>
+                                <td class="align-middle text-muted">
+                                    {{ lesson.content|truncatewords:10 }}
+                                </td>
+                                <td class="align-middle">
+                                    {{ lesson.created_at|date:"d/m/Y" }}
+                                </td>
+                                <td class="align-middle">
+                                    {% if user.role == 'student' %}
+                                        {% with status=lessons_status %}
+                                            {% if lesson.id in status %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    {{ lesson.get_status_display  }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-clock me-1 fs-5"></i>
+                                                    Chưa ghi danh
+                                                </span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% elif user.role == 'teacher' %}
+                                        <span class="badge bg-info m-2 p-2 fs-6">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            {{ lesson.get_status_display  }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                {% if user.role == 'teacher' %}
+                                <td class="align-middle">
+                                    <div class="d-flex">
+                                        <a href="{% url 'edit_lesson' course.id lesson.id %}" class="btn btn-warning btn-sm me-2">
+                                            <i class="fas fa-edit me-1"></i>
+                                            Sửa
+                                        </a>
+                                        <form method="post" action="{% url 'delete_lesson' course.id lesson.id %}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài học này không?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash me-1"></i>
+                                                Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                                {% elif user.role == 'student' %}
+                                <td class="align-middle">
+                                    <a href="{% url 'lesson_detail' course.id lesson.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-user-plus me-1"></i>
+                                        Vào học
+                                    </a>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
+        </div>
+    </div>
+
+
+<!-- Exams Section -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Danh sách bài kiểm tra</h4>
+        {% if user.role == 'teacher' %}
+        <a href="{% url 'add_exam' course.id %}" class="btn btn-success">
+            <i class="fas fa-plus-circle me-2"></i>
+            Thêm bài kiểm tra
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" class="border-0">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Tên bài kiểm tra
+                        </th>
+                        <th scope="col" class="border-0">
+                            <i class="fas fa-calendar me-2"></i>
+                            Ngày thi
+                        </th>
+                        <th scope="col" class="border-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Thao tác
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exam in exams %}
+                    <tr>
+                        <td class="align-middle">
+                            <strong>{{ exam.exam_name }}</strong>
+                        </td>
+                        <td class="align-middle">
+                            {{ exam.exam_date|date:"d/m/Y" }}
+                        </td>
+                        <td class="align-middle">
+                            {% if user.role == 'teacher' %}
+                            <div class="d-flex">
+                                <a href="{% url 'edit_exam' exam.id %}" class="btn btn-warning btn-sm me-2">
+                                    <i class="fas fa-edit me-1"></i>
+                                    Sửa
+                                </a>
+                                <a href="{% url 'get_key' exam.id %}" class="btn btn-info btn-sm me-2">
+                                    <i class="fas fa-key me-1"></i>
+                                    Đáp án
+                                </a>
+                                <a href="{% url 'get_key' exam.id %}" class="btn btn-info btn-sm me-2">
+                                    <i class="fas fa-key me-1"></i>
+                                    Đáp án
+                                </a>
+                                <form method="post" action="{% url 'delete_exam' exam.id %}" 
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài kiểm tra này không?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash me-1"></i>
+                                        Xóa
+                                    </button>
+                                </form>
+                            </div>
+                            {% elif user.role == 'student' %}
+                            <a href="{% url 'submit_answer' exam.id %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-pencil-alt me-1"></i>
+                                Làm bài
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

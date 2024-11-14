@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Danh sách học sinh tham gia {{ course.title }}</h2>
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">Full Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Enrollment Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in enrolled_students %}
+            <tr>
+                <td>{{ student.first_name }} {{ student.last_name }}</td>
+                <td>{{ student.email }}</td>
+                <td>{{ student.enrollment_set.first.enrolled_at|date:"d M Y H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">No students enrolled in this course.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
