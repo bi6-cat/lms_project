@@ -5,6 +5,7 @@ import cv2
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.db import models
+from matplotlib import pyplot as plt
 
 from courses.models import Course
 from exams.Scan_score.test_scanner import Test_Scanner
@@ -175,45 +176,28 @@ from exams.Scan_score import *
 from exams.Scan_score.main_scanner import main
 from exams.Scan_score.test_scanner import Test_Scanner
 import os
+from PIL import Image
 from exams.Scan_score import utlis
 def get_files_inTestPics():
     return [x for x in os.listdir('D:/Code/Python/Project_Python/lms_project/media/uploads_key_student/images')] #Duong dan tuyet doi ta co the thay bang duong dan tuong doi
 
 # @teacher_required
-def cham_bai(request,exam_id):
-    # Lay danh sách đáp án
-    # exam = Exam.objects.get(id = exam_id)
-    # key = Examkey.objects.filter(exam = exam)
-    answer = ["A"] * 50
-    Student_list_TestScore = []
-    studentss = ""
-    # media_path = Path(settings.MEDIA_ROOT) / 'uploads_key_student' / 'images'
-    # paths = list(media_path.iterdir())  # Quét tất cả các tệp trong thư mục
-    paths1 = Path('D:/Code/Python/Project_Python/lms_project/media/uploads_key_student/images')
-    # path = "D:/Code/Python/Project_Python/lms_project/exams/Scan_score/images/img1.jpg"
-    # folder_path = Path('D:/Code/Python/Project_Python/lms_project/media/uploads_key_student/images')
-    paths = [p for p in paths1.iterdir() if p.is_file()]  # Chỉ lấy các tệp (không phải thư mục)
-    # print(paths)
-    studentss = str(len(paths))
-    # studentss = paths[0]
-    for path in paths:
-        
-        widthImg = 800
-        heightImg = 800
-        img = cv2.imread(path)
-        img = cv2.resize(img, (widthImg, heightImg))
-        T_scanner = Test_Scanner(answer, img)
-        result = T_scanner.get_Infor()
-        print(result)
-        #   return [IdStudent, totalScore, IdExam]
-        # id_student =  int(result[0][0:3])
-        score = result[1]
-        # print(id_student)
-        studentss = str(int(result[0][0:3]))
-        
-    return render(request, 'exams/cham_bai.html',{'student':studentss})
-        
-
+def cham_bai(request, submitexam_id):
+    submit_exam = get_object_or_404(SubmitExam, id=submitexam_id)
+    exam = submit_exam.exam
+    examfile = submit_exam.exam_file
+    path = os.path.join(settings.MEDIA_ROOT, examfile.name)
+    # image = Image.open(path)
+    answer = ['A'] * 50
+    widthImg = 800
+    heightImg = 800
+    img = cv2.imread(path)
+    img = cv2.resize(img, (widthImg, heightImg))
+    T_scanner = Test_Scanner(answer, img)
+    id_student, score, id_exam = T_scanner.get_Infor()
+    submit_exam.marks = 2
+    submit_exam.save()
+    return render(request, 'exams/cham_bai.html', { 'id_student': id_student, 'score': score, 'id_exam': id_exam})
 
 
 
