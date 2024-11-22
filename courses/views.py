@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
-from exams.models import Exam
+from exams.models import Exam, SubmitExam
 from lessons.models import Lesson
 from users.models import Student, User
 from .models import Course, Enrollment
@@ -112,13 +112,11 @@ def search_courses(request):
 def course_detail(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     lessons = Lesson.objects.filter(course=course)
-    exams = Exam.objects.filter(course=course)  # Lấy các bài kiểm tra của khóa học
-
-    # Lấy tổng số học sinh tham gia khóa học
+    exams = Exam.objects.filter(course=course)
     total_students = Enrollment.objects.filter(course=course).count()
     is_enrolled = Enrollment.objects.filter(course=course, student=request.user).exists()
 
-    # Trạng thái bài học (dành cho sinh viên)
+    # Trạng thái bài học
     lessons_status = {}
     if request.user.role == 'student':
         try:
@@ -135,27 +133,34 @@ def course_detail(request, course_id):
                     'enrolled_at': None,
                 }
 
-    # Trạng thái bài kiểm tra (dành cho sinh viên)
+    # Trạng thái bài kiểm tra và nộp bài
     exams_status = {}
+    submitted_exams = {}
     if request.user.role == 'student':
         student = Student.objects.get(user=request.user)
         for exam in exams:
             exam_result = exam.examresult_set.filter(student=student).first()
+            # Kiểm tra xem học sinh đã nộp bài chưa
+            submitted = SubmitExam.objects.filter(exam=exam, student=student).exists()
+            
             exams_status[exam.id] = {
                 'status': 'completed' if exam_result else 'pending',
                 'score': exam_result.total_score if exam_result else None,
                 'attempt_count': exam.examresult_set.filter(student=student).count(),
-                'last_attempt': exam_result.graded_at if exam_result else None
+                'last_attempt': exam_result.graded_at if exam_result else None,
+                'submitted': submitted
             }
+            submitted_exams[exam.id] = submitted
             
     return render(request, 'courses/course_detail.html', {
         'course': course,
         'lessons': lessons,
-        'exams': exams,  # Chuyển danh sách bài kiểm tra sang template
+        'exams': exams,
         'is_enrolled': is_enrolled,
         'lessons_status': lessons_status,
-        'exams_status': exams_status,  # Trạng thái bài kiểm tra cho sinh viên
+        'exams_status': exams_status,
         'total_students': total_students,
+        'submitted_exams': submitted_exams,
     })
     
 @login_required
