@@ -22,7 +22,7 @@ class TeacherRequiredMixin(UserPassesTestMixin):
         return self.request.user.role == 'teacher'
 
     def handle_no_permission(self):
-        return redirect('home') 
+        return redirect('403') 
     
 # Tao 1 ky thi
 class AddExamView(TeacherRequiredMixin, CreateView):
@@ -194,18 +194,24 @@ def get_key(request, exam_id):
 
 
 # Ham nop bai tu hoc sinh
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+
 class SubmitAnswerView(CreateView):
     model = SubmitExam
     form_class = SubmitAnswerForm
     template_name = 'exams/submit_answer.html'
-    success_url = reverse_lazy('show_exam')
+    
     def form_valid(self, form):
         exam_id = self.kwargs.get('exam_id')
         exam = get_object_or_404(Exam, id=exam_id)
         student = self.request.user.student
         form.instance.exam = exam
         form.instance.student = student
-        return super().form_valid(form)
+        self.object = form.save()
+        # Get course_id from exam's course
+        course_id = exam.course.id
+        return HttpResponseRedirect(reverse('course_detail', kwargs={'course_id': course_id}))
     
     
 def get_files_inTestPics():
@@ -216,8 +222,8 @@ def cham_tat_ca(request, exam_id):
     submits = SubmitExam.objects.filter(exam=exam)
     results = []
     answer = Examkey.objects.filter(exam=exam)
-    answers  = []
-    key = []
+    answers = []
+    key = [1]*51
     for ans in answer:
         li = {
             'question_number': ans.question_number,
@@ -226,6 +232,8 @@ def cham_tat_ca(request, exam_id):
         key.append(ans.correct_answer)
         answers.append(li)
     paths = []
+    
+    total_score = 0
     for submit in submits:
         examfile = submit.exam_file
         path = os.path.join(settings.MEDIA_ROOT, examfile.name)
@@ -236,17 +244,20 @@ def cham_tat_ca(request, exam_id):
         img = cv2.resize(img, (widthImg, heightImg))
         T_scanner = Test_Scanner(key, img)
         id_student, score, id_exam = T_scanner.get_Infor()
-        submit.marks = score 
+        submit.marks = float(str.format("{0:.2f}", float(score)))
         submit.save()
-        score = str.format("{0:.2f}", score)
+        score_float = float(str.format("{0:.2f}", float(score)))  # Convert score to float
+        total_score += score_float
         results.append({
             'id_student': id_student,
             'score': score,
             'id_exam': id_exam,
         })
-    return render(request, 'exams/test_cham_bai.html', { 'results': key})
-        
+    
+    # Calculate average
+    average_score = total_score / len(results) if results else 0
 
-
-
-                
+    return render(request, 'exams/cham_bai.html', {
+        'results': results,
+        'average_score': average_score
+    })     
