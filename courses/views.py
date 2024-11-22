@@ -37,30 +37,44 @@ def course_list(request):
     })
 
 
-# Create view cho thêm khóa học
+# courses/views.py
+
 class CourseCreateView(TeacherRequiredMixin, CreateView):
     model = Course
     form_class = CourseForm
     template_name = 'courses/add_course.html'
     
     def form_valid(self, form):
-        course = form.save(commit=False) # Lưu form nhưng chưa commit vào database
-        form.instance.teacher = self.request.user  # Gán giáo viên cho khóa học
-        # course.teacher = self.request.user  # Gán giáo viên cho khóa học
-        course.save() # Lưu khóa học
+        course = form.save(commit=False)
+        course.teacher = self.request.user
+        
+        if 'background' in self.request.FILES:
+            course.background = self.request.FILES['background']
+            
+        course.save()
         return redirect('course_list')
 
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
 
-# Update view cho chỉnh sửa khóa học
+
 class CourseUpdateView(TeacherRequiredMixin, UpdateView):
     model = Course
     form_class = CourseForm
     template_name = 'courses/edit_course.html'
     
-    def get_success_url(self):
-        # Điều hướng đến trang chi tiết của khóa học sau khi cập nhật thành công
-        return reverse('course_detail', kwargs={'course_id': self.object.id})
+    def form_valid(self, form):
+        course = form.save(commit=False)
+        if 'background' in self.request.FILES:
+            course.background = self.request.FILES['background']
+        course.save()
+        return redirect('course_detail', course_id=course.id)
 
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_success_url(self):
+        return reverse('course_detail', kwargs={'course_id': self.object.id})
     
 # Delete view cho xóa khóa học
 class CourseDeleteView(TeacherRequiredMixin, DeleteView):

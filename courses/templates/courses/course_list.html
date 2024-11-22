@@ -17,71 +17,88 @@
     <div class="course-grid">
         {% for course in courses %}
         <div class="course-card">
-            <div class="course-card-header">
-                <h3>{{ course.title }}</h3>
-                {% if user.role == 'teacher' %}
-                
-                {% endif %}
+            <div class="course-image" style="background-image: url('{{ course.background.url }}')">
+                <div class="course-overlay">
+                    <div class="rating">
+                        <div class="stars">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= course.rate %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="rating-text">{{ course.rate|floatformat:1 }}/5.0</span>
+                    </div>
+                </div>
             </div>
             
-            <div class="course-info">
-                <div class="info-item">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                    <span>{{ course.teacher }}</span>
+            <div class="course-content">
+                <div class="course-card-header">
+                    <h3>{{ course.title }}</h3>
                 </div>
-                <div class="info-item">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>{{ course.start_date }}</span>
+                
+                <div class="course-info">
+                    <div class="info-item">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <span>{{ course.teacher }}</span>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ course.start_date|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>{{ course.end_date|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-users"></i>
+                        <span>
+                            {% if course.id in course_student_counts %}
+                                {{ course_student_counts|get_item:course.id }}
+                            {% else %}
+                                0
+                            {% endif %}
+                            học sinh
+                        </span>
+                    </div>
                 </div>
-                <div class="info-item">
-                    <i class="fas fa-calendar-check"></i>
-                    <span>{{ course.end_date }}</span>
-                </div>
-                <div class="info-item">
-                    <i class="fas fa-users"></i>
-                    <span>
-                        {% if course.id in course_student_counts %}
-                            {{ course_student_counts|get_item:course.id }}
-                        {% else %}
-                            0
-                        {% endif %}
-                        học sinh
-                    </span>
-                </div>
-            </div>
 
-            <div class="course-footer">
-                {% if user.role != 'teacher' %}
-                    {% if course.id in enrolled_courses %}
-                        <button class="btn-enrolled" disabled>
-                            <i class="fas fa-check"></i> Đã đăng ký
-                        </button>
-                        <p></p>
-                        <a href="{% url 'course_detail' course.id %}" class="btn-details">
-                            <i class="fas fa-info-circle"></i> Xem chi tiết
-                        </a>
+                <div class="course-footer">
+                    {% if user.role != 'teacher' %}
+                        {% if course.id in enrolled_courses %}
+                            <button class="btn-enrolled" disabled>
+                                <i class="fas fa-check"></i> Đã đăng ký
+                            </button>
+                            <a href="{% url 'course_detail' course.id %}" class="btn-details" style="background: #27ae60;">
+                                <i class="fa-brands fa-leanpub"></i> Vào học
+                            </a>
+                        {% else %}
+                            <a href="{% url 'course_detail' course.id %}" class="btn-details">
+                                <i class="fas fa-info-circle"></i> Xem chi tiết
+                            </a>
+                        {% endif %}
                     {% else %}
                         <a href="{% url 'course_detail' course.id %}" class="btn-details">
                             <i class="fas fa-info-circle"></i> Xem chi tiết
                         </a>
+                        <div class="course-actions">
+                            <a href="{% url 'edit_course' course.id %}" class="btn-edit">
+                                <i class="fas fa-edit"></i> Chỉnh sửa
+                            </a>
+                            <form method="post" action="{% url 'delete_course' course.id %}" 
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa khóa học này không?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
                     {% endif %}
-                {% else %}
-                    <a href="{% url 'course_detail' course.id %}" class="btn-details">
-                        <i class="fas fa-info-circle"></i> Xem chi tiết
-                    </a>
-                    <div class="course-actions d-flex justify-content-between w-100" style="width: 98%;">
-                        <a href="{% url 'edit_course' course.id %}" class="btn-edit btn btn-primary flex-grow-1 my-2">
-                            <i class="fas fa-edit"></i> Chỉnh sửa
-                        </a>
-                        <form method="post" action="{% url 'delete_course' course.id %}" onsubmit="return confirm('Bạn có chắc chắn muốn xóa khóa học này không?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-delete btn btn-danger flex-grow-1 my-2">
-                                <i class="fas fa-trash "></i>
-                            </button>
-                        </form>
-                    </div>
-                    
-                {% endif %}
+                </div>
             </div>
         </div>
         {% endfor %}
@@ -112,75 +129,106 @@
     color: #2c3e50;
     margin: 0;
     font-size: 2rem;
+    font-weight: 600;
 }
 
 .create-course-btn {
     background-color: #2ecc71;
     color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 12px 24px;
+    border-radius: 8px;
     text-decoration: none;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    font-weight: 500;
 }
 
 .create-course-btn:hover {
     background-color: #27ae60;
+    transform: translateY(-2px);
 }
 
 .course-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
 }
 
 .course-card {
     background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     overflow: hidden;
-    transition: transform 0.3s;
+    transition: transform 0.3s ease;
 }
 
 .course-card:hover {
     transform: translateY(-5px);
 }
 
-.course-card-header {
-    background: #3498db;
-    color: white;
+.course-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.course-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
     padding: 15px;
     display: flex;
-    justify-content: space-between;
+    align-items: flex-start;
+    justify-content: flex-end;
+}
+
+.rating {
+    background: rgba(255,255,255,0.9);
+    padding: 8px 12px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
 }
 
+.stars {
+    color: #f1c40f;
+    font-size: 0.9rem;
+}
+
+.rating-text {
+    color: #2c3e50;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.course-content {
+    padding: 20px;
+}
+
+.course-card-header {
+    margin-bottom: 15px;
+}
+
 .course-card-header h3 {
+    color: #2c3e50;
     margin: 0;
-    font-size: 1.2rem;
-}
-
-.course-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.btn-edit, .btn-delete {
-    color: white;
-    border-radius: 4px;
-    text-decoration: none;
-}
-
-.btn-edit {
-    background: #f39c12;
-    border: none;
-}
-
-.btn-delete {
-    background: #e74c3c;
+    font-size: 1.3rem;
+    font-weight: 600;
 }
 
 .course-info {
-    padding: 20px;
+    padding: 0 0 15px 0;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
 }
 
 .info-item {
@@ -197,20 +245,22 @@
 }
 
 .course-footer {
-    padding: 15px;
     border-top: 1px solid #ecf0f1;
-    text-align: center;
+    padding-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.btn-enrolled, .btn-details {
-    width: 100%;
+.btn-enrolled, .btn-details, .btn-edit, .btn-delete {
     padding: 10px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
     text-decoration: none;
-    display: inline-block;
+    text-align: center;
+    transition: all 0.3s ease;
 }
 
 .btn-enrolled {
@@ -223,8 +273,38 @@
     color: white;
 }
 
+.btn-details-l {
+    background: green;
+    color: white;
+}
+
 .btn-details:hover {
     background: #2980b9;
+}
+
+.course-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-edit {
+    flex: 1;
+    background: #f39c12;
+    color: white;
+}
+
+.btn-delete {
+    width: 46px;
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #d35400;
+}
+
+.btn-delete:hover {
+    background: #c0392b;
 }
 
 .no-courses {
@@ -247,6 +327,10 @@
         flex-direction: column;
         gap: 15px;
         text-align: center;
+    }
+
+    .course-image {
+        height: 180px;
     }
 }
 </style>

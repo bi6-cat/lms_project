@@ -29,11 +29,12 @@ class AddExamView(TeacherRequiredMixin, CreateView):
     model = Exam
     form_class = ExamForm
     template_name = 'exams/add_exam.html'
+    
     def get_success_url(self):
         # Lấy course_id từ kwargs
         course_id = self.kwargs.get('course_id')
         # Sử dụng course_id để tạo đường dẫn
-        return reverse_lazy('show_exam', args=[course_id])
+        return reverse_lazy('course_detail', args=[course_id])
 
     def form_valid(self, form):
         course_id = self.kwargs.get('course_id')
@@ -74,13 +75,14 @@ class EditExamView(TeacherRequiredMixin, UpdateView):
 class DeleteExamView(TeacherRequiredMixin, DeleteView):
     model = Exam
     template_name = 'exams/delete_exam.html'  #Template xac nhan xoa
+    
     def get_success_url(self):
         # Lấy course_id từ kwargs
         exam = self.get_object()
         course = exam.course
         course_id = course.id
         # Sử dụng course_id để tạo đường dẫn
-        return reverse_lazy('show_exam', args=[course_id])
+        return reverse_lazy('course_detail', args=[course_id])
     def test_func(self):
         exam = self.get_object()
         course = exam.course

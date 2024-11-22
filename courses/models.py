@@ -9,7 +9,8 @@ class Course(models.Model):
     teacher = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses')
     start_date = models.DateField()  
     end_date = models.DateField()
-    # Thêm background
+    rate = models.FloatField(default=0)
+    background = models.ImageField(upload_to='course_backgrounds/')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

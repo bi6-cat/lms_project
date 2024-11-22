@@ -221,9 +221,9 @@
 
                     <div class="navbar-nav">
                         {% if user.is_authenticated %}
-                            <div class="navbar-user">
+                            <div class="navbar-user d-flex align-items-center">
                                 <div class="user-avatar">
-                                    {{ user.username|make_list|first|upper }}
+                                    <img src="https://avatar.iran.liara.run/public/boy?username=Ash" alt="Avatar" class="rounded-circle" width="40" height="40">
                                 </div>
                                 <div class="d-flex flex-column ms-2">
                                     <span class="small text-muted">Xin chào,</span>
@@ -242,6 +242,7 @@
                             </a>
                         {% endif %}
                     </div>
+                    
                 </div>
             </div>
         </nav>
