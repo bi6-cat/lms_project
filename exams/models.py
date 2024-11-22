@@ -28,7 +28,7 @@ class SubmitExam(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     exam_file = models.FileField(null=True, blank=True,upload_to='uploads_key_student/')
-    marks = models.IntegerField(null=True, blank=True)  
+    marks = models.FloatField(null=True, blank=True)  
     create_at = models.DateTimeField(auto_now_add=True)
     objects = models.Manager()
 

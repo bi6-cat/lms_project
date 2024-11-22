@@ -215,24 +215,38 @@ def cham_tat_ca(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
     submits = SubmitExam.objects.filter(exam=exam)
     results = []
+    answer = Examkey.objects.filter(exam=exam)
+    answers  = []
+    key = []
+    for ans in answer:
+        li = {
+            'question_number': ans.question_number,
+            'correct_answer': ans.correct_answer
+        }
+        key.append(ans.correct_answer)
+        answers.append(li)
+    paths = []
     for submit in submits:
         examfile = submit.exam_file
         path = os.path.join(settings.MEDIA_ROOT, examfile.name)
-        answer = ['A'] * 50
+        paths.append(path)
         widthImg = 800
         heightImg = 800
         img = cv2.imread(path)
         img = cv2.resize(img, (widthImg, heightImg))
-        T_scanner = Test_Scanner(answer, img)
+        T_scanner = Test_Scanner(key, img)
         id_student, score, id_exam = T_scanner.get_Infor()
-        submit.marks = score
+        submit.marks = score 
         submit.save()
+        score = str.format("{0:.2f}", score)
         results.append({
             'id_student': id_student,
             'score': score,
             'id_exam': id_exam,
         })
-    return render(request, 'exams/cham_bai.html', { 'results': results })
+    return render(request, 'exams/test_cham_bai.html', { 'results': key})
         
+
+
 
                 

@@ -1,0 +1,22 @@
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container py-4">
+    <h2>Chấm điểm tất cả bài thi</h2>
+    <div class="card">
+        <div class="card-header">
+            <h4>Danh sach dap an</h4>
+        </div>
+        <div class="card-body">
+            {% for result in results %}
+                <tr>
+                    <td>{{result}}</td>
+                    
+                </tr>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
