@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h1>Xác Nhận Xóa</h1>
+<p>Bạn có chắc chắn muốn xóa tất cả các đáp án của bài thi "{{ exam.exam_name }}"?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a href="{% url 'show_exam' exam.course.id %}" class="btn btn-secondary">Hủy</a>
+</form>
+{% endblock %}

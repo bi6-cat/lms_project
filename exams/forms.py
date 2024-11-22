@@ -5,10 +5,12 @@ from exams.models import Exam, Examkey, SubmitExam
 class ExamForm(forms.ModelForm):
     class Meta:
         model = Exam
-        fields = ['exam_name', 'exam_date']
+        fields = ['exam_name', 'exam_description', 'exam_date', 'exam_time']
         widgets = {
             'exam_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'exam_date': forms.DateInput(attrs={'type': 'date'})
+            'exam_description': forms.Textarea(attrs={'class': 'form-control'}),
+            'exam_date': forms.DateInput(attrs={'type': 'date'}),
+            'exam_time': forms.TimeInput(attrs={'type': 'time'})
         }
 
 class ExamKeyForm(forms.ModelForm):

@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<h2>Thay doi ki thi</h2>
+<h2>Thay đổi kỳ thi</h2>
 <form method="POST">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">thay doi</button>
+    <button type="submit" class="btn btn-primary">Thay đổi</button>
 </form>
-<a href="#">Quay lại danh sách</a>
+<button onclick="history.back()">Quay lại</button>
+
 {% endblock %}

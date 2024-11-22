@@ -5,7 +5,9 @@ from users.models import Student
 class Exam(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     exam_name = models.CharField(max_length=255)
+    exam_description = models.TextField()
     exam_date = models.DateField()
+    exam_time = models.TimeField()
     objects = models.Manager()
 
     
