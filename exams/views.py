@@ -1,47 +1,40 @@
+from exams.Scan_score import *
+from exams.Scan_score.test_scanner import Test_Scanner
 import csv
 import os
-from pathlib import Path
 import cv2
-from django.http import HttpResponse
 from django.shortcuts import render
-from django.db import models
-
-from courses.models import Course
+from matplotlib import pyplot as plt
+from django.contrib.auth.decorators import login_required
+from users.decorators import teacher_required
+from courses.models import Course, Enrollment
 from exams.Scan_score.test_scanner import Test_Scanner
 from exams.forms import ExamForm, ExamKeyForm, KeyUpLoadForm, SubmitAnswerForm
 from exams.models import Exam, Examkey, SubmitExam
 from lms_project import settings
-from users.models import Student
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse, reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import  CreateView, UpdateView, DeleteView
 
-# Create your views here.
-# 6. Exams App (Quản lý thi trắc nghiệm)
-# /exams/: Danh sách các kỳ thi.
-# /exams/add/: Tạo kỳ thi mới (Teacher).
-# /exams/<int:exam_id>/edit/: Chỉnh sửa kỳ thi (Teacher).
-# /exams/<int:exam_id>/delete/: Xóa kỳ thi (Teacher/Admin).
-# /exams/<int:exam_id>/answers/: Xem câu trả lời và điểm của bài thi trắc nghiệm.
-# /exams/<int:exam_id>/scan/: Quét bài thi trắc nghiệm để chấm điểm tự động (Teacher).
-# /exams/reports/: Xuất báo cáo kết quả thi dưới dạng file CSV hoặc PDF (Teacher/Admin).
 class TeacherRequiredMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.role == 'teacher'
 
     def handle_no_permission(self):
         return redirect('home') 
+    
 # Tao 1 ky thi
 class AddExamView(TeacherRequiredMixin, CreateView):
     model = Exam
     form_class = ExamForm
     template_name = 'exams/add_exam.html'
+    
     def get_success_url(self):
         # Lấy course_id từ kwargs
         course_id = self.kwargs.get('course_id')
         # Sử dụng course_id để tạo đường dẫn
-        return reverse_lazy('show_exam', args=[course_id])
+        return reverse_lazy('course_detail', args=[course_id])
 
     def form_valid(self, form):
         course_id = self.kwargs.get('course_id')
@@ -55,32 +48,41 @@ def show_exam(request, course_id):
     return render(request, 'exams/show_exam.html', {
         'exams': exams
     })
+    
+
 # Chinh sua ki thi
 class EditExamView(TeacherRequiredMixin, UpdateView):
     model = Exam
     form_class = ExamForm
     template_name = 'exams/edit_exam.html'
+
     def get_success_url(self):
-        # Lấy course_id từ kwargs
-        course_id = self.kwargs.get('course_id')
-        # Sử dụng course_id để tạo đường dẫn
-        return reverse_lazy('show_exam', args=[course_id])
+        # Lấy exam_id từ instance
+        exam_id = self.object.id
+        # Sử dụng exam_id để tạo đường dẫn
+        return reverse_lazy('exam_detail', args=[exam_id])
+
     def form_valid(self, form):
-        course_id = self.kwargs.get('course_id')
-        course = get_object_or_404(Course, id=course_id)
-        form.instance.course = course
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['exam_id'] = self.object.id
+        return context
+    
+
 # Xoa ky thi
 class DeleteExamView(TeacherRequiredMixin, DeleteView):
     model = Exam
     template_name = 'exams/delete_exam.html'  #Template xac nhan xoa
+    
     def get_success_url(self):
         # Lấy course_id từ kwargs
         exam = self.get_object()
         course = exam.course
         course_id = course.id
         # Sử dụng course_id để tạo đường dẫn
-        return reverse_lazy('show_exam', args=[course_id])
+        return reverse_lazy('course_detail', args=[course_id])
     def test_func(self):
         exam = self.get_object()
         course = exam.course
@@ -88,32 +90,61 @@ class DeleteExamView(TeacherRequiredMixin, DeleteView):
         if self.request.user.role == 'teacher':
             return True
         return False
+
+@login_required
+@teacher_required
+def exam_detail(request, exam_id):
+    exam = get_object_or_404(Exam, id=exam_id)
+    course = exam.course
     
-# Tao dap an cho bai thi, tao tung cau 1
-class AddExamKeyView(TeacherRequiredMixin, CreateView):
-    model = Examkey
-    form_class = ExamKeyForm
-    template_name = 'exams/add_examkey.html'
-    success_url = reverse_lazy('show_exam')
-    def form_valid(self, form):
-        exam_id = self.kwargs.get('exam_id')
-        exam = get_object_or_404(Exam, id=exam_id)
-        form.instance.exam = exam
-        return super().form_valid(form)
+    # Get all enrolled students
+    enrollments = Enrollment.objects.filter(course=course)
+    students_in_course = [enrollment.student for enrollment in enrollments]
     
+    # Get submitted exams
+    submitted_exams = SubmitExam.objects.filter(exam=exam)
+    submitted_students_ids = submitted_exams.values_list('student', flat=True)
+    
+    # Split students into submitted and not submitted
+    students_submitted = [student for student in students_in_course if student.id in submitted_students_ids]
+    students_not_submitted = [student for student in students_in_course if student.id not in submitted_students_ids]
+    
+    # Get exam keys
+    exam_keys = Examkey.objects.filter(exam=exam).order_by('question_number')
+    
+    # Create dictionary of submissions with scores
+    submissions_dict = {
+        submission.student.id: submission for submission in submitted_exams
+    }
+
+    context = {
+        'exam': exam,
+        'course': course,
+        'students_submitted': students_submitted,
+        'students_not_submitted': students_not_submitted,
+        'exam_keys': exam_keys,
+        'submissions_dict': submissions_dict,
+    }
+    
+    return render(request, 'exams/exam_detail.html', context)
 # Edit dap an cho bai thi
 class EditExamKeyView(TeacherRequiredMixin, UpdateView):
     model = Examkey
     form_class = ExamKeyForm
     template_name = 'exams/edit_examkey.html'
-    # success_url = reverse_lazy('show_exam')
     
     def test_func(self):
         examkey = self.get_object()
-        if self.request.user.role == 'teacher':
-            return True
-        return False
+        return self.request.user.role == 'teacher'
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['exam_id'] = self.kwargs.get('exam_id')
+        return context
+    
+    def get_success_url(self):
+        exam_id = self.kwargs.get('exam_id')
+        return reverse_lazy('exam_detail', kwargs={'exam_id': exam_id})
 # Xoa dap an cho bai thi
 class DeleteExamKeyView(TeacherRequiredMixin, DeleteView):
     model = Examkey
@@ -125,32 +156,42 @@ class DeleteExamKeyView(TeacherRequiredMixin, DeleteView):
         if self.request.user.role == 'teacher':
             return True
         return False
+
+# Xoa tat ca dap an cua bai thi
+@login_required
+@teacher_required
+def delete_all_exam_keys(request, exam_id):
+    exam = get_object_or_404(Exam, id=exam_id)
+    if request.method == 'POST':
+        Examkey.objects.filter(exam=exam).delete()
+        return redirect('show_exam', course_id=exam.course.id)
+    return render(request, 'exams/delete_all_exam_keys.html', {'exam': exam})
  
 # Ham lay dap an tu file csv
-def transform_answer(request, exam_id):
-    if(request.method == "POST"):
+from django.shortcuts import redirect
+from django.urls import reverse
+
+def get_key(request, exam_id):
+    if request.method == "POST":
         exam = Exam.objects.get(id=exam_id)
-        course_id = exam.course.id
         form = KeyUpLoadForm(request.POST, request.FILES)
         if form.is_valid():
             upload_file = request.FILES['file']
             upload_dir = os.path.join(settings.MEDIA_ROOT, 'exam_key')
-            path = os.path.join(upload_dir, upload_file.name)  # Sử dụng đường dẫn đã tạo ở trên
+            path = os.path.join(upload_dir, upload_file.name)
             with open(path, 'wb+') as destination:
                 for chunk in upload_file.chunks():
                     destination.write(chunk)
-            with open(path ,'r') as f:
+            with open(path, 'r') as f:
                 reader = csv.reader(f)
-                for  row in reader:
+                for row in reader:
                     question_number = row[0]
                     correct_answer = row[1]
-                    examkey = Examkey.objects.create(exam=exam, question_number=question_number, correct_answer=correct_answer)
-                    examkey.save()
-            message = 'File uploaded successfully'
-            # Chua buu show_error.html
-            #  Cho nay su dung redict de khi tai lai trang no k tu upload lai file
-            return render(request, 'exams/show_error.html', {'message': message})
+                    Examkey.objects.create(exam=exam, question_number=question_number, correct_answer=correct_answer)
+            # Chuyển hướng về trang chi tiết
+            return redirect(reverse('exam_detail', args=[exam_id]))
     return render(request, 'exams/get_examkey.html', {'form': KeyUpLoadForm()})
+
 
 # Ham nop bai tu hoc sinh
 class SubmitAnswerView(CreateView):
@@ -166,59 +207,46 @@ class SubmitAnswerView(CreateView):
         form.instance.student = student
         return super().form_valid(form)
     
-
     
-
-
-from users.decorators import teacher_required
-from exams.Scan_score import *
-from exams.Scan_score.main_scanner import main
-from exams.Scan_score.test_scanner import Test_Scanner
-import os
-from exams.Scan_score import utlis
 def get_files_inTestPics():
     return [x for x in os.listdir('D:/Code/Python/Project_Python/lms_project/media/uploads_key_student/images')] #Duong dan tuyet doi ta co the thay bang duong dan tuong doi
 
-# @teacher_required
-def cham_bai(request,exam_id):
-    # Lay danh sách đáp án
-    # exam = Exam.objects.get(id = exam_id)
-    # key = Examkey.objects.filter(exam = exam)
-    answer = ["A"] * 50
-    Student_list_TestScore = []
-    studentss = ""
-    # media_path = Path(settings.MEDIA_ROOT) / 'uploads_key_student' / 'images'
-    # paths = list(media_path.iterdir())  # Quét tất cả các tệp trong thư mục
-    paths1 = Path('D:/Code/Python/Project_Python/lms_project/media/uploads_key_student/images')
-    # path = "D:/Code/Python/Project_Python/lms_project/exams/Scan_score/images/img1.jpg"
-    # folder_path = Path('D:/Code/Python/Project_Python/lms_project/media/uploads_key_student/images')
-    paths = [p for p in paths1.iterdir() if p.is_file()]  # Chỉ lấy các tệp (không phải thư mục)
-    # print(paths)
-    studentss = str(len(paths))
-    # studentss = paths[0]
-    for path in paths:
-        
+def cham_tat_ca(request, exam_id):
+    exam = get_object_or_404(Exam, id=exam_id)
+    submits = SubmitExam.objects.filter(exam=exam)
+    results = []
+    answer = Examkey.objects.filter(exam=exam)
+    answers  = []
+    key = []
+    for ans in answer:
+        li = {
+            'question_number': ans.question_number,
+            'correct_answer': ans.correct_answer
+        }
+        key.append(ans.correct_answer)
+        answers.append(li)
+    paths = []
+    for submit in submits:
+        examfile = submit.exam_file
+        path = os.path.join(settings.MEDIA_ROOT, examfile.name)
+        paths.append(path)
         widthImg = 800
         heightImg = 800
         img = cv2.imread(path)
         img = cv2.resize(img, (widthImg, heightImg))
-        T_scanner = Test_Scanner(answer, img)
-        result = T_scanner.get_Infor()
-        print(result)
-        #   return [IdStudent, totalScore, IdExam]
-        # id_student =  int(result[0][0:3])
-        score = result[1]
-        # print(id_student)
-        studentss = str(int(result[0][0:3]))
+        T_scanner = Test_Scanner(key, img)
+        id_student, score, id_exam = T_scanner.get_Infor()
+        submit.marks = score 
+        submit.save()
+        score = str.format("{0:.2f}", score)
+        results.append({
+            'id_student': id_student,
+            'score': score,
+            'id_exam': id_exam,
+        })
+    return render(request, 'exams/test_cham_bai.html', { 'results': key})
         
-    return render(request, 'exams/cham_bai.html',{'student':studentss})
-        
 
 
-
-
-
-
-        
 
                 

@@ -1,7 +1,8 @@
 # courses/urls.py
 
 from django.urls import path
-from .views import *  # Import tất cả các view từ file views.py
+from .views import *
+from courses import views  # Import tất cả các view từ file views.py
 # app_name = 'courses'  
 urlpatterns = [
     path('', course_list, name='course_list'),  
@@ -12,4 +13,5 @@ urlpatterns = [
     path('<int:course_id>/enroll/', enroll_course, name='enroll_course'),
     path('<int:course_id>/unenroll/', unenroll_course, name='unenroll_course'),
     path('search/', search_courses, name='search_courses'),
+    path('course/<int:course_id>/students/', views.enrolled_students_list, name='enrolled_students_list'),
 ]

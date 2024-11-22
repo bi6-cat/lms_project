@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<h2>Thay doi cau hoi</h2>
+<h2>Thay đổi câu hỏi</h2>
 <form method="POST">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">thay doi</button>
+    <button type="submit" class="btn btn-primary">Thay đổi</button>
 </form>
-<a href="#">Quay lại danh sách</a>
+<a href="{% url 'exam_detail' exam_id %}">Quay lại danh sách</a>
 {% endblock %}

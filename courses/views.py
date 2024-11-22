@@ -1,7 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 
+from exams.models import Exam
 from lessons.models import Lesson
+from users.models import Student, User
 from .models import Course, Enrollment
 from .forms import CourseForm  
 from django.contrib.auth.decorators import login_required
@@ -35,30 +37,44 @@ def course_list(request):
     })
 
 
-# Create view cho thêm khóa học
+# courses/views.py
+
 class CourseCreateView(TeacherRequiredMixin, CreateView):
     model = Course
     form_class = CourseForm
     template_name = 'courses/add_course.html'
     
     def form_valid(self, form):
-        course = form.save(commit=False) # Lưu form nhưng chưa commit vào database
-        form.instance.teacher = self.request.user  # Gán giáo viên cho khóa học
-        # course.teacher = self.request.user  # Gán giáo viên cho khóa học
-        course.save() # Lưu khóa học
+        course = form.save(commit=False)
+        course.teacher = self.request.user
+        
+        if 'background' in self.request.FILES:
+            course.background = self.request.FILES['background']
+            
+        course.save()
         return redirect('course_list')
 
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
 
-# Update view cho chỉnh sửa khóa học
+
 class CourseUpdateView(TeacherRequiredMixin, UpdateView):
     model = Course
     form_class = CourseForm
     template_name = 'courses/edit_course.html'
     
-    def get_success_url(self):
-        # Điều hướng đến trang chi tiết của khóa học sau khi cập nhật thành công
-        return reverse('course_detail', kwargs={'course_id': self.object.id})
+    def form_valid(self, form):
+        course = form.save(commit=False)
+        if 'background' in self.request.FILES:
+            course.background = self.request.FILES['background']
+        course.save()
+        return redirect('course_detail', course_id=course.id)
 
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_success_url(self):
+        return reverse('course_detail', kwargs={'course_id': self.object.id})
     
 # Delete view cho xóa khóa học
 class CourseDeleteView(TeacherRequiredMixin, DeleteView):
@@ -91,35 +107,66 @@ def search_courses(request):
     return render(request, 'courses/course_list.html', {'courses': courses}) # Trả về trang danh sách khóa học với danh sách khóa học đã lọc
 
 
+
 @login_required
 def course_detail(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     lessons = Lesson.objects.filter(course=course)
+    exams = Exam.objects.filter(course=course)  # Lấy các bài kiểm tra của khóa học
 
     # Lấy tổng số học sinh tham gia khóa học
     total_students = Enrollment.objects.filter(course=course).count()
     is_enrolled = Enrollment.objects.filter(course=course, student=request.user).exists()
 
-    # Nếu là sinh viên, lấy trạng thái của từng bài học
+    # Trạng thái bài học (dành cho sinh viên)
     lessons_status = {}
     if request.user.role == 'student':
-        for lesson in lessons:
-            try:
-                enrollment = Enrollment.objects.get(course=course, student=request.user)
+        try:
+            enrollment = Enrollment.objects.get(course=course, student=request.user)
+            for lesson in lessons:
                 lessons_status[lesson.id] = {
                     'status': lesson.status,
                     'enrolled_at': enrollment.enrolled_at,
                 }
-            except Enrollment.DoesNotExist:
+        except Enrollment.DoesNotExist:
+            for lesson in lessons:
                 lessons_status[lesson.id] = {
                     'status': 'not enrolled',
                     'enrolled_at': None,
                 }
-    
+
+    # Trạng thái bài kiểm tra (dành cho sinh viên)
+    exams_status = {}
+    if request.user.role == 'student':
+        student = Student.objects.get(user=request.user)
+        for exam in exams:
+            exam_result = exam.examresult_set.filter(student=student).first()
+            exams_status[exam.id] = {
+                'status': 'completed' if exam_result else 'pending',
+                'score': exam_result.total_score if exam_result else None,
+                'attempt_count': exam.examresult_set.filter(student=student).count(),
+                'last_attempt': exam_result.graded_at if exam_result else None
+            }
+            
     return render(request, 'courses/course_detail.html', {
         'course': course,
         'lessons': lessons,
+        'exams': exams,  # Chuyển danh sách bài kiểm tra sang template
         'is_enrolled': is_enrolled,
         'lessons_status': lessons_status,
+        'exams_status': exams_status,  # Trạng thái bài kiểm tra cho sinh viên
         'total_students': total_students,
+    })
+    
+@login_required
+def enrolled_students_list(request, course_id):
+    # Lấy khóa học dựa trên course_id
+    course = get_object_or_404(Course, id=course_id)
+    
+    # Lấy danh sách học sinh đã đăng ký khóa học
+    enrolled_students = User.objects.filter(enrollment__course=course, role='student')
+
+    return render(request, 'courses/enrolled_students_list.html', {
+        'course': course,
+        'enrolled_students': enrolled_students,
     })

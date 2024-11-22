@@ -4,7 +4,7 @@ from .models import Course
 class CourseForm(forms.ModelForm):
     class Meta:
         model = Course  # Sử dụng model Course
-        fields = ['title', 'description', 'start_date', 'end_date']  # Các trường cần có trong form
+        fields = ['title', 'description', 'start_date', 'end_date', 'background'] 
 
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tiêu đề khóa học'}),
